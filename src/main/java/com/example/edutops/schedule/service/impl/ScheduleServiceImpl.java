@@ -55,17 +55,15 @@ public class ScheduleServiceImpl
         validateEffectiveDateRange(request.getEffectiveFrom(), request.getEffectiveTo());
 
         // 1. Kiểm tra trùng phòng học
-        List<Schedule> roomConflicts = scheduleRepository.findConflictingRoomSchedules(
-                room.getId(), request.getDayOfWeek(), request.getStartTime(), request.getEndTime());
-        if (!roomConflicts.isEmpty()) {
+        if (scheduleRepository.existsConflictingRoomSchedule(
+                room.getId(), request.getDayOfWeek(), request.getStartTime(), request.getEndTime())) {
             throw new BusinessException(ErrorCode.SCHEDULE_CONFLICT,
                     "Xung đột lịch: Phòng học '" + room.getName() + "' đã bận trong khung giờ này");
         }
 
         // 2. Kiểm tra trùng lịch giảng dạy của giáo viên
-        List<Schedule> teacherConflicts = scheduleRepository.findConflictingTeacherSchedules(
-                classGroup.getTeacher().getId(), request.getDayOfWeek(), request.getStartTime(), request.getEndTime());
-        if (!teacherConflicts.isEmpty()) {
+        if (scheduleRepository.existsConflictingTeacherSchedule(
+                classGroup.getTeacher().getId(), request.getDayOfWeek(), request.getStartTime(), request.getEndTime())) {
             String teacherName = resolveTeacherName(classGroup);
             throw new BusinessException(ErrorCode.SCHEDULE_CONFLICT,
                     "Xung đột lịch: Giáo viên '" + teacherName + "' đã bận trong khung giờ này");
@@ -97,17 +95,15 @@ public class ScheduleServiceImpl
         validateEffectiveDateRange(request.getEffectiveFrom(), request.getEffectiveTo());
 
         // 1. Kiểm tra trùng phòng học (loại trừ chính nó)
-        List<Schedule> roomConflicts = scheduleRepository.findConflictingRoomSchedulesExcludingSelf(
-                room.getId(), request.getDayOfWeek(), request.getStartTime(), request.getEndTime(), publicId);
-        if (!roomConflicts.isEmpty()) {
+        if (scheduleRepository.existsConflictingRoomScheduleExcludingSelf(
+                room.getId(), request.getDayOfWeek(), request.getStartTime(), request.getEndTime(), publicId)) {
             throw new BusinessException(ErrorCode.SCHEDULE_CONFLICT,
                     "Xung đột lịch: Phòng học '" + room.getName() + "' đã bận trong khung giờ này");
         }
 
         // 2. Kiểm tra trùng lịch giảng dạy của giáo viên (loại trừ chính nó)
-        List<Schedule> teacherConflicts = scheduleRepository.findConflictingTeacherSchedulesExcludingSelf(
-                schedule.getClassGroup().getTeacher().getId(), request.getDayOfWeek(), request.getStartTime(), request.getEndTime(), publicId);
-        if (!teacherConflicts.isEmpty()) {
+        if (scheduleRepository.existsConflictingTeacherSchedulesExcludingSelf(
+                schedule.getClassGroup().getTeacher().getId(), request.getDayOfWeek(), request.getStartTime(), request.getEndTime(), publicId)) {
             String teacherName = resolveTeacherName(schedule.getClassGroup());
             throw new BusinessException(ErrorCode.SCHEDULE_CONFLICT,
                     "Xung đột lịch: Giáo viên '" + teacherName + "' đã bận trong khung giờ này");

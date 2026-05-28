@@ -17,18 +17,20 @@ public interface ScheduleRepository extends BaseRepository<Schedule> {
     List<Schedule> findByClassGroupPublicId(UUID classGroupPublicId);
 
     // Kiểm tra xung đột phòng học (khi tạo mới)
-    @Query("SELECT s FROM Schedule s WHERE s.room.id = :roomId AND s.dayOfWeek = :dayOfWeek " +
+    @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END FROM Schedule s " +
+           "WHERE s.room.id = :roomId AND s.dayOfWeek = :dayOfWeek " +
            "AND s.startTime < :endTime AND s.endTime > :startTime")
-    List<Schedule> findConflictingRoomSchedules(
+    boolean existsConflictingRoomSchedule(
             @Param("roomId") Long roomId,
             @Param("dayOfWeek") DayOfWeek dayOfWeek,
             @Param("startTime") LocalTime startTime,
             @Param("endTime") LocalTime endTime);
 
     // Kiểm tra xung đột phòng học (khi cập nhật - loại trừ chính nó)
-    @Query("SELECT s FROM Schedule s WHERE s.room.id = :roomId AND s.dayOfWeek = :dayOfWeek " +
+    @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END FROM Schedule s " +
+           "WHERE s.room.id = :roomId AND s.dayOfWeek = :dayOfWeek " +
            "AND s.startTime < :endTime AND s.endTime > :startTime AND s.publicId <> :excludePublicId")
-    List<Schedule> findConflictingRoomSchedulesExcludingSelf(
+    boolean existsConflictingRoomScheduleExcludingSelf(
             @Param("roomId") Long roomId,
             @Param("dayOfWeek") DayOfWeek dayOfWeek,
             @Param("startTime") LocalTime startTime,
@@ -36,18 +38,20 @@ public interface ScheduleRepository extends BaseRepository<Schedule> {
             @Param("excludePublicId") UUID excludePublicId);
 
     // Kiểm tra xung đột giáo viên (khi tạo mới)
-    @Query("SELECT s FROM Schedule s WHERE s.classGroup.teacher.id = :teacherId AND s.dayOfWeek = :dayOfWeek " +
+    @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END FROM Schedule s " +
+           "WHERE s.classGroup.teacher.id = :teacherId AND s.dayOfWeek = :dayOfWeek " +
            "AND s.startTime < :endTime AND s.endTime > :startTime")
-    List<Schedule> findConflictingTeacherSchedules(
+    boolean existsConflictingTeacherSchedule(
             @Param("teacherId") Long teacherId,
             @Param("dayOfWeek") DayOfWeek dayOfWeek,
             @Param("startTime") LocalTime startTime,
             @Param("endTime") LocalTime endTime);
 
     // Kiểm tra xung đột giáo viên (khi cập nhật - loại trừ chính nó)
-    @Query("SELECT s FROM Schedule s WHERE s.classGroup.teacher.id = :teacherId AND s.dayOfWeek = :dayOfWeek " +
+    @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END FROM Schedule s " +
+           "WHERE s.classGroup.teacher.id = :teacherId AND s.dayOfWeek = :dayOfWeek " +
            "AND s.startTime < :endTime AND s.endTime > :startTime AND s.publicId <> :excludePublicId")
-    List<Schedule> findConflictingTeacherSchedulesExcludingSelf(
+    boolean existsConflictingTeacherSchedulesExcludingSelf(
             @Param("teacherId") Long teacherId,
             @Param("dayOfWeek") DayOfWeek dayOfWeek,
             @Param("startTime") LocalTime startTime,
