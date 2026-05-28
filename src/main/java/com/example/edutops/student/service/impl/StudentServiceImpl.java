@@ -121,10 +121,7 @@ public class StudentServiceImpl
         User user = userRepository.findByPublicId(userPublicId)
                 .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, userPublicId));
 
-        if (user.getRole() != UserRole.STUDENT) {
-            throw new BusinessException(ErrorCode.VALIDATION_FAILED, 
-                    "Chỉ tài khoản học viên mới có quyền hoàn tất hồ sơ học viên");
-        }
+        user.validateStudentRole();
 
         if (studentRepository.findByUserPublicId(userPublicId).isPresent()) {
             throw new BusinessException(ErrorCode.VALIDATION_FAILED, 

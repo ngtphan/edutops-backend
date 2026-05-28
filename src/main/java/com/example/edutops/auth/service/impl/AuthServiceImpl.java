@@ -77,9 +77,7 @@ public class AuthServiceImpl implements AuthService {
             });
 
             // Nếu tài khoản đã bị khóa
-            if (!user.isActive()) {
-                throw new BusinessException(ErrorCode.INVALID_TOKEN, "Tài khoản của bạn hiện đang bị khóa");
-            }
+            user.validateActiveStatus();
 
             // 3. Kiểm tra xem profile đã hoàn thành hay chưa
             boolean profileCompleted = true;

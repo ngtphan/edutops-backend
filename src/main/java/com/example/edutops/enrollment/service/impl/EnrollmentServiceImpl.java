@@ -57,10 +57,7 @@ public class EnrollmentServiceImpl
         }
 
         long activeStudents = enrollmentRepository.countActiveStudentsInClass(classGroup.getId());
-        if (activeStudents >= classGroup.getMaxStudents()) {
-            throw BusinessException.withDetail(ErrorCode.CLASS_GROUP_FULL, 
-                    classGroup.getCode() + " (Max: " + classGroup.getMaxStudents() + ")");
-        }
+        classGroup.checkCapacity(activeStudents);
 
         Enrollment enrollment = new Enrollment();
         enrollment.setStudent(student);

@@ -54,7 +54,7 @@ public class UserServiceImpl
     public void toggleActive(UUID publicId) {
         User entity = userRepository.findByPublicId(publicId)
                 .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, publicId));
-        entity.setActive(!entity.isActive());
+        entity.toggleActive();
         userRepository.save(entity);
     }
 
