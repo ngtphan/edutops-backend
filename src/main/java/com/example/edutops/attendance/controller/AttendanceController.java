@@ -3,7 +3,9 @@ package com.example.edutops.attendance.controller;
 import com.example.edutops.attendance.dto.AttendanceCreateRequest;
 import com.example.edutops.attendance.dto.AttendanceResponse;
 import com.example.edutops.attendance.dto.AttendanceUpdateRequest;
+import com.example.edutops.attendance.dto.ClassAttendanceBatchRequest;
 import com.example.edutops.attendance.service.AttendanceService;
+import com.example.edutops.common.annotation.Audit;
 import com.example.edutops.common.controller.BaseController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -93,6 +95,15 @@ public class AttendanceController extends BaseController<AttendanceCreateRequest
             @PathVariable UUID schedulePublicId,
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         List<AttendanceResponse> list = attendanceService.getByScheduleAndDate(schedulePublicId, date);
+        return ResponseEntity.ok(list);
+    }
+
+    @PostMapping("/batch")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLASS_MANAGER', 'TEACHER')")
+    @Operation(summary = "Điểm danh theo lô cho cả lớp học (ADMIN, CLASS_MANAGER hoặc TEACHER)")
+    @Audit(action = "SAVE_BATCH_ATTENDANCE", entity = "Attendance")
+    public ResponseEntity<List<AttendanceResponse>> saveBatch(@Valid @RequestBody ClassAttendanceBatchRequest request) {
+        List<AttendanceResponse> list = attendanceService.saveClassAttendanceBatch(request);
         return ResponseEntity.ok(list);
     }
 }

@@ -15,6 +15,8 @@ public interface AttendanceRepository extends BaseRepository<Attendance> {
 
     boolean existsByScheduleIdAndStudentIdAndAttendanceDate(Long scheduleId, Long studentId, LocalDate attendanceDate);
 
+    java.util.Optional<Attendance> findByScheduleIdAndStudentIdAndAttendanceDate(Long scheduleId, Long studentId, LocalDate attendanceDate);
+
     List<Attendance> findByStudentPublicId(UUID studentPublicId);
 
     @Query("SELECT a FROM Attendance a WHERE a.schedule.publicId = :schedulePublicId AND a.attendanceDate = :date")

@@ -3,6 +3,8 @@ package com.example.edutops.attendance.service.impl;
 import com.example.edutops.attendance.dto.AttendanceCreateRequest;
 import com.example.edutops.attendance.dto.AttendanceResponse;
 import com.example.edutops.attendance.dto.AttendanceUpdateRequest;
+import com.example.edutops.attendance.dto.ClassAttendanceBatchRequest;
+import com.example.edutops.attendance.dto.StudentAttendanceDto;
 import com.example.edutops.attendance.entity.Attendance;
 import com.example.edutops.attendance.repository.AttendanceRepository;
 import com.example.edutops.attendance.service.AttendanceService;
@@ -129,5 +131,40 @@ public class AttendanceServiceImpl
     @Override
     protected void updateEntityFromRequest(Attendance entity, AttendanceUpdateRequest request) {
         throw new UnsupportedOperationException("Sử dụng luồng nghiệp vụ custom trong hàm update()");
+    }
+
+    @Override
+    @Transactional
+    public List<AttendanceResponse> saveClassAttendanceBatch(ClassAttendanceBatchRequest request) {
+        Schedule schedule = scheduleRepository.findByPublicId(request.getSchedulePublicId())
+                .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, request.getSchedulePublicId()));
+
+        return request.getStudentAttendances().stream().map(dto -> {
+            Student student = studentRepository.findByPublicId(dto.getStudentPublicId())
+                    .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, dto.getStudentPublicId()));
+
+            // 1. Kiểm tra học viên có đăng ký lớp học này hay không
+            if (!enrollmentRepository.existsByStudentIdAndClassGroupId(student.getId(), schedule.getClassGroup().getId())) {
+                throw new BusinessException(ErrorCode.STUDENT_NOT_ENROLLED,
+                        "Học viên '" + student.getFullName() + "' không thuộc lớp học này");
+            }
+
+            // 2. Logic Upsert (Cập nhật nếu đã tồn tại, tạo mới nếu chưa)
+            Attendance attendance = attendanceRepository
+                    .findByScheduleIdAndStudentIdAndAttendanceDate(schedule.getId(), student.getId(), request.getAttendanceDate())
+                    .orElseGet(() -> {
+                        Attendance newAttendance = new Attendance();
+                        newAttendance.setSchedule(schedule);
+                        newAttendance.setStudent(student);
+                        newAttendance.setAttendanceDate(request.getAttendanceDate());
+                        return newAttendance;
+                    });
+
+            attendance.setStatus(dto.getStatus());
+            attendance.setNote(dto.getNote());
+
+            Attendance saved = attendanceRepository.save(attendance);
+            return convertToResponse(saved);
+        }).collect(Collectors.toList());
     }
 }
