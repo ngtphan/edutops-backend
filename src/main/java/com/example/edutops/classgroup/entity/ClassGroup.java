@@ -141,6 +141,18 @@ public class ClassGroup extends BaseEntity {
     }
 
     /**
+     * Kiểm tra sĩ số lớp học có vượt quá giới hạn hay không (OOP - Rich Domain Model).
+     */
+    public void checkCapacity(long currentActiveCount) {
+        if (currentActiveCount >= this.maxStudents) {
+            throw com.example.edutops.common.exception.BusinessException.withDetail(
+                    com.example.edutops.common.exception.ErrorCode.CLASS_GROUP_FULL, 
+                    this.code + " (Max: " + this.maxStudents + ")"
+            );
+        }
+    }
+
+    /**
      * Lấy tên giáo viên phụ trách một cách an toàn (OOP - Encapsulation).
      */
     public String getTeacherName() {

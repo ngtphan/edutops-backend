@@ -101,4 +101,33 @@ public class User extends BaseEntity {
     public void setActive(boolean active) {
         this.active = active;
     }
+
+    /**
+     * Kiểm tra trạng thái hoạt động của tài khoản (OOP - Rich Domain Model).
+     */
+    public void validateActiveStatus() {
+        if (!this.active) {
+            throw new com.example.edutops.common.exception.BusinessException(
+                    com.example.edutops.common.exception.ErrorCode.USER_LOCKED
+            );
+        }
+    }
+
+    /**
+     * Xác thực tài khoản phải có vai trò Học viên (OOP - Rich Domain Model).
+     */
+    public void validateStudentRole() {
+        if (this.role != UserRole.STUDENT) {
+            throw new com.example.edutops.common.exception.BusinessException(
+                    com.example.edutops.common.exception.ErrorCode.STUDENT_PROFILE_REQUIRE_STUDENT_ROLE
+            );
+        }
+    }
+
+    /**
+     * Đảo trạng thái kích hoạt của tài khoản (OOP - Rich Domain Model).
+     */
+    public void toggleActive() {
+        this.active = !this.active;
+    }
 }

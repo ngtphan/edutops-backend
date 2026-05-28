@@ -29,7 +29,9 @@ public enum ErrorCode {
     CLASS_GROUP_FULL("CLG_002", "Lớp học đã đạt sĩ số tối đa", HttpStatus.valueOf(422)),
     SCHEDULE_CONFLICT("SCH_001", "Xung đột lịch học: Trùng giáo viên hoặc trùng phòng học", HttpStatus.CONFLICT),
     ATTENDANCE_ALREADY_EXISTS("ATT_001", "Bản ghi điểm danh của học viên này trong buổi học này đã tồn tại", HttpStatus.CONFLICT),
-    STUDENT_NOT_ENROLLED("ENR_002", "Học viên chưa được ghi danh vào lớp học này", HttpStatus.valueOf(422));
+    STUDENT_NOT_ENROLLED("ENR_002", "Học viên chưa được ghi danh vào lớp học này", HttpStatus.valueOf(422)),
+    USER_LOCKED("USR_002", "Tài khoản của bạn hiện đang bị khóa", HttpStatus.UNAUTHORIZED),
+    STUDENT_PROFILE_REQUIRE_STUDENT_ROLE("USR_003", "Chỉ tài khoản học viên mới có quyền hoàn tất hồ sơ học viên", HttpStatus.BAD_REQUEST);
 
     private final String code;
     private final String defaultMessage;
