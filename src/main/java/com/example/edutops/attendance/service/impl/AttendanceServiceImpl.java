@@ -60,7 +60,7 @@ public class AttendanceServiceImpl
 
         // 1. Kiểm tra học viên có thuộc lớp học của lịch này hay không
         if (!enrollmentRepository.existsByStudentIdAndClassGroupId(student.getId(), schedule.getClassGroup().getId())) {
-            throw new BusinessException(ErrorCode.STUDENT_NOT_ENROLLED);
+            throw BusinessException.withDetail(ErrorCode.STUDENT_NOT_ENROLLED, student.getUser().getFullName());
         }
 
         // 2. Kiểm tra trùng lặp điểm danh cho ngày hôm đó
@@ -145,8 +145,7 @@ public class AttendanceServiceImpl
 
             // 1. Kiểm tra học viên có đăng ký lớp học này hay không
             if (!enrollmentRepository.existsByStudentIdAndClassGroupId(student.getId(), schedule.getClassGroup().getId())) {
-                throw new BusinessException(ErrorCode.STUDENT_NOT_ENROLLED,
-                        "Học viên '" + student.getFullName() + "' không thuộc lớp học này");
+                throw BusinessException.withDetail(ErrorCode.STUDENT_NOT_ENROLLED, student.getUser().getFullName());
             }
 
             // 2. Logic Upsert (Cập nhật nếu đã tồn tại, tạo mới nếu chưa)

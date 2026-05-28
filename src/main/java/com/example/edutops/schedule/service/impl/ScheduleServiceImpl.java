@@ -57,16 +57,14 @@ public class ScheduleServiceImpl
         // 1. Kiểm tra trùng phòng học
         if (scheduleRepository.existsConflictingRoomSchedule(
                 room.getId(), request.getDayOfWeek(), request.getStartTime(), request.getEndTime())) {
-            throw new BusinessException(ErrorCode.SCHEDULE_CONFLICT,
-                    "Xung đột lịch: Phòng học '" + room.getName() + "' đã bận trong khung giờ này");
+            throw BusinessException.withDetail(ErrorCode.SCHEDULE_CONFLICT, "Phòng học: " + room.getName());
         }
 
         // 2. Kiểm tra trùng lịch giảng dạy của giáo viên
         if (scheduleRepository.existsConflictingTeacherSchedule(
                 classGroup.getTeacher().getId(), request.getDayOfWeek(), request.getStartTime(), request.getEndTime())) {
             String teacherName = resolveTeacherName(classGroup);
-            throw new BusinessException(ErrorCode.SCHEDULE_CONFLICT,
-                    "Xung đột lịch: Giáo viên '" + teacherName + "' đã bận trong khung giờ này");
+            throw BusinessException.withDetail(ErrorCode.SCHEDULE_CONFLICT, "Giáo viên: " + teacherName);
         }
 
         Schedule schedule = new Schedule();
@@ -97,16 +95,14 @@ public class ScheduleServiceImpl
         // 1. Kiểm tra trùng phòng học (loại trừ chính nó)
         if (scheduleRepository.existsConflictingRoomScheduleExcludingSelf(
                 room.getId(), request.getDayOfWeek(), request.getStartTime(), request.getEndTime(), publicId)) {
-            throw new BusinessException(ErrorCode.SCHEDULE_CONFLICT,
-                    "Xung đột lịch: Phòng học '" + room.getName() + "' đã bận trong khung giờ này");
+            throw BusinessException.withDetail(ErrorCode.SCHEDULE_CONFLICT, "Phòng học: " + room.getName());
         }
 
         // 2. Kiểm tra trùng lịch giảng dạy của giáo viên (loại trừ chính nó)
         if (scheduleRepository.existsConflictingTeacherSchedulesExcludingSelf(
                 schedule.getClassGroup().getTeacher().getId(), request.getDayOfWeek(), request.getStartTime(), request.getEndTime(), publicId)) {
             String teacherName = resolveTeacherName(schedule.getClassGroup());
-            throw new BusinessException(ErrorCode.SCHEDULE_CONFLICT,
-                    "Xung đột lịch: Giáo viên '" + teacherName + "' đã bận trong khung giờ này");
+            throw BusinessException.withDetail(ErrorCode.SCHEDULE_CONFLICT, "Giáo viên: " + teacherName);
         }
 
         schedule.setRoom(room);
