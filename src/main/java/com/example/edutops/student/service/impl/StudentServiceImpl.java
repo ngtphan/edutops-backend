@@ -2,6 +2,7 @@ package com.example.edutops.student.service.impl;
 
 import com.example.edutops.common.exception.BusinessException;
 import com.example.edutops.common.exception.ErrorCode;
+import com.example.edutops.common.mapper.EntityMapper;
 import com.example.edutops.common.service.impl.BaseServiceImpl;
 import com.example.edutops.student.dto.StudentCreateRequest;
 import com.example.edutops.student.dto.StudentResponse;
@@ -12,8 +13,10 @@ import com.example.edutops.student.service.StudentService;
 import com.example.edutops.user.entity.User;
 import com.example.edutops.user.entity.UserRole;
 import com.example.edutops.user.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.edutops.common.annotation.Audit;
 
 import java.util.UUID;
 
@@ -24,26 +27,33 @@ public class StudentServiceImpl
 
     private final StudentRepository studentRepository;
     private final UserRepository userRepository;
+    private final EntityMapper entityMapper;
+    private final PasswordEncoder passwordEncoder;
 
-    public StudentServiceImpl(StudentRepository studentRepository, UserRepository userRepository) {
+    public StudentServiceImpl(StudentRepository studentRepository, 
+                              UserRepository userRepository,
+                              EntityMapper entityMapper,
+                              PasswordEncoder passwordEncoder) {
         super(studentRepository);
         this.studentRepository = studentRepository;
         this.userRepository = userRepository;
+        this.entityMapper = entityMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     @Transactional
+    @Audit(action = "CREATE_STUDENT", entity = "Student")
     public StudentResponse create(StudentCreateRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS, 
-                    "Email '" + request.getEmail() + "' đã được sử dụng bởi tài khoản khác");
+            throw BusinessException.withDetail(ErrorCode.EMAIL_ALREADY_EXISTS, request.getEmail());
         }
 
         // 1. Tạo tài khoản User liên kết cho học viên
         User user = new User();
         user.setEmail(request.getEmail());
         user.setFullName(request.getFullName());
-        user.setPasswordHash("HASHED_" + request.getPassword()); // Giả lập băm mật khẩu
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setRole(UserRole.STUDENT);
         user.setActive(true);
         User savedUser = userRepository.save(user);
@@ -61,10 +71,10 @@ public class StudentServiceImpl
 
     @Override
     @Transactional
+    @Audit(action = "UPDATE_STUDENT", entity = "Student")
     public StudentResponse update(UUID publicId, StudentUpdateRequest request) {
         Student student = studentRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, 
-                        "Không tìm thấy học viên với ID: " + publicId));
+                .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, publicId));
 
         // Cập nhật thông tin User liên kết
         User user = student.getUser();
@@ -80,10 +90,10 @@ public class StudentServiceImpl
 
     @Override
     @Transactional
+    @Audit(action = "DELETE_STUDENT", entity = "Student")
     public void delete(UUID publicId) {
         Student student = studentRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, 
-                        "Không tìm thấy học viên với ID: " + publicId));
+                .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, publicId));
 
         User user = student.getUser();
 
@@ -100,17 +110,16 @@ public class StudentServiceImpl
     @Transactional(readOnly = true)
     public StudentResponse getByUserPublicId(UUID userPublicId) {
         Student student = studentRepository.findByUserPublicId(userPublicId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, 
-                        "Không tìm thấy học viên ứng với tài khoản có ID: " + userPublicId));
+                .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, userPublicId));
         return convertToResponse(student);
     }
 
     @Override
     @Transactional
+    @Audit(action = "COMPLETE_STUDENT_PROFILE", entity = "Student")
     public StudentResponse completeProfile(UUID userPublicId, com.example.edutops.student.dto.StudentProfileCompleteRequest request) {
         User user = userRepository.findByPublicId(userPublicId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, 
-                        "Không tìm thấy tài khoản có ID: " + userPublicId));
+                .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, userPublicId));
 
         if (user.getRole() != UserRole.STUDENT) {
             throw new BusinessException(ErrorCode.VALIDATION_FAILED, 
@@ -134,29 +143,12 @@ public class StudentServiceImpl
 
     @Override
     protected Student convertToEntity(StudentCreateRequest request) {
-        // Hàm này không được gọi trực tiếp vì ta đã override hàm 'create' 
-        // để xử lý nghiệp vụ tạo liên kết User - Student phức tạp hơn.
         throw new UnsupportedOperationException("Sử dụng luồng nghiệp vụ custom trong hàm create()");
     }
 
     @Override
     protected StudentResponse convertToResponse(Student entity) {
-        StudentResponse response = new StudentResponse();
-        response.setPublicId(entity.getPublicId());
-        response.setCreatedAt(entity.getCreatedAt());
-        response.setUpdatedAt(entity.getUpdatedAt());
-        
-        if (entity.getUser() != null) {
-            response.setUserPublicId(entity.getUser().getPublicId());
-            response.setEmail(entity.getUser().getEmail());
-            response.setFullName(entity.getUser().getFullName());
-            response.setActive(entity.getUser().isActive());
-        }
-        
-        response.setPhoneNumber(entity.getPhoneNumber());
-        response.setDateOfBirth(entity.getDateOfBirth());
-        response.setGender(entity.getGender());
-        return response;
+        return entityMapper.toStudentResponse(entity);
     }
 
     @Override

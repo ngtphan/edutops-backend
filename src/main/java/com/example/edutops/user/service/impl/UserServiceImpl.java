@@ -9,8 +9,10 @@ import com.example.edutops.user.dto.UserUpdateRequest;
 import com.example.edutops.user.entity.User;
 import com.example.edutops.user.repository.UserRepository;
 import com.example.edutops.user.service.UserService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.edutops.common.annotation.Audit;
 
 import java.util.UUID;
 
@@ -20,18 +22,20 @@ public class UserServiceImpl
         implements UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         super(userRepository);
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     @Transactional
+    @Audit(action = "CREATE_USER", entity = "User")
     public UserResponse create(UserCreateRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS, 
-                    "Email '" + request.getEmail() + "' đã tồn tại trong hệ thống");
+            throw BusinessException.withDetail(ErrorCode.EMAIL_ALREADY_EXISTS, request.getEmail());
         }
         return super.create(request);
     }
@@ -40,33 +44,31 @@ public class UserServiceImpl
     @Transactional(readOnly = true)
     public UserResponse getByEmail(String email) {
         User entity = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, 
-                        "Không tìm thấy người dùng với email: " + email));
+                .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, email));
         return convertToResponse(entity);
     }
 
     @Override
     @Transactional
+    @Audit(action = "TOGGLE_USER_ACTIVE", entity = "User")
     public void toggleActive(UUID publicId) {
         User entity = userRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, 
-                        "Không tìm thấy người dùng với ID: " + publicId));
+                .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, publicId));
         entity.setActive(!entity.isActive());
         userRepository.save(entity);
     }
 
     @Override
     @Transactional
+    @Audit(action = "CHANGE_USER_PASSWORD", entity = "User")
     public void changePassword(UUID publicId, String newPassword) {
         if (newPassword == null || newPassword.trim().length() < 6) {
             throw new BusinessException(ErrorCode.VALIDATION_FAILED, "Mật khẩu mới phải có ít nhất 6 ký tự");
         }
         User entity = userRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, 
-                        "Không tìm thấy người dùng với ID: " + publicId));
+                .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, publicId));
         
-        // Mô phỏng băm mật khẩu (sau này sẽ dùng BCryptPasswordEncoder)
-        entity.setPasswordHash("HASHED_" + newPassword);
+        entity.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(entity);
     }
 
@@ -75,8 +77,7 @@ public class UserServiceImpl
         User user = new User();
         user.setEmail(request.getEmail());
         user.setFullName(request.getFullName());
-        // Giả lập băm mật khẩu
-        user.setPasswordHash("HASHED_" + request.getPassword());
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setRole(request.getRole());
         user.setActive(true);
         return user;
@@ -99,5 +100,19 @@ public class UserServiceImpl
     protected void updateEntityFromRequest(User entity, UserUpdateRequest request) {
         entity.setFullName(request.getFullName());
         entity.setActive(request.isActive());
+    }
+
+    @Override
+    @Transactional
+    @Audit(action = "UPDATE_USER", entity = "User")
+    public UserResponse update(UUID publicId, UserUpdateRequest request) {
+        return super.update(publicId, request);
+    }
+
+    @Override
+    @Transactional
+    @Audit(action = "DELETE_USER", entity = "User")
+    public void delete(UUID publicId) {
+        super.delete(publicId);
     }
 }

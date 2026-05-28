@@ -2,8 +2,8 @@ package com.example.edutops.teacher.service.impl;
 
 import com.example.edutops.common.exception.BusinessException;
 import com.example.edutops.common.exception.ErrorCode;
+import com.example.edutops.common.mapper.EntityMapper;
 import com.example.edutops.common.service.impl.BaseServiceImpl;
-import com.example.edutops.subject.dto.SubjectResponse;
 import com.example.edutops.subject.entity.Subject;
 import com.example.edutops.subject.repository.SubjectRepository;
 import com.example.edutops.teacher.dto.TeacherCreateRequest;
@@ -15,13 +15,14 @@ import com.example.edutops.teacher.service.TeacherService;
 import com.example.edutops.user.entity.User;
 import com.example.edutops.user.entity.UserRole;
 import com.example.edutops.user.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.edutops.common.annotation.Audit;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class TeacherServiceImpl 
@@ -31,29 +32,35 @@ public class TeacherServiceImpl
     private final TeacherRepository teacherRepository;
     private final UserRepository userRepository;
     private final SubjectRepository subjectRepository;
+    private final EntityMapper entityMapper;
+    private final PasswordEncoder passwordEncoder;
 
     public TeacherServiceImpl(TeacherRepository teacherRepository, 
                               UserRepository userRepository, 
-                              SubjectRepository subjectRepository) {
+                              SubjectRepository subjectRepository,
+                              EntityMapper entityMapper,
+                              PasswordEncoder passwordEncoder) {
         super(teacherRepository);
         this.teacherRepository = teacherRepository;
         this.userRepository = userRepository;
         this.subjectRepository = subjectRepository;
+        this.entityMapper = entityMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     @Transactional
+    @Audit(action = "CREATE_TEACHER", entity = "Teacher")
     public TeacherResponse create(TeacherCreateRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS, 
-                    "Email '" + request.getEmail() + "' đã được sử dụng bởi tài khoản khác");
+            throw BusinessException.withDetail(ErrorCode.EMAIL_ALREADY_EXISTS, request.getEmail());
         }
 
         // 1. Tạo tài khoản User liên kết cho giáo viên
         User user = new User();
         user.setEmail(request.getEmail());
         user.setFullName(request.getFullName());
-        user.setPasswordHash("HASHED_" + request.getPassword()); // Giả lập băm mật khẩu
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setRole(UserRole.TEACHER);
         user.setActive(true);
         User savedUser = userRepository.save(user);
@@ -65,16 +72,7 @@ public class TeacherServiceImpl
         teacher.setBio(request.getBio());
 
         // 3. Liên kết các môn học giảng dạy
-        if (request.getSubjectPublicIds() != null && !request.getSubjectPublicIds().isEmpty()) {
-            Set<Subject> subjects = new HashSet<>();
-            for (String subPublicId : request.getSubjectPublicIds()) {
-                Subject subject = subjectRepository.findByPublicId(UUID.fromString(subPublicId))
-                        .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, 
-                                "Không tìm thấy môn học giảng dạy có ID: " + subPublicId));
-                subjects.add(subject);
-            }
-            teacher.setSubjects(subjects);
-        }
+        teacher.setSubjects(resolveSubjects(request.getSubjectPublicIds()));
 
         Teacher savedTeacher = teacherRepository.save(teacher);
         return convertToResponse(savedTeacher);
@@ -82,10 +80,10 @@ public class TeacherServiceImpl
 
     @Override
     @Transactional
+    @Audit(action = "UPDATE_TEACHER", entity = "Teacher")
     public TeacherResponse update(UUID publicId, TeacherUpdateRequest request) {
         Teacher teacher = teacherRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, 
-                        "Không tìm thấy giáo viên với ID: " + publicId));
+                .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, publicId));
 
         // Cập nhật họ tên của User liên kết
         User user = teacher.getUser();
@@ -97,16 +95,7 @@ public class TeacherServiceImpl
         teacher.setBio(request.getBio());
 
         // Cập nhật các môn học giảng dạy mới
-        Set<Subject> subjects = new HashSet<>();
-        if (request.getSubjectPublicIds() != null && !request.getSubjectPublicIds().isEmpty()) {
-            for (String subPublicId : request.getSubjectPublicIds()) {
-                Subject subject = subjectRepository.findByPublicId(UUID.fromString(subPublicId))
-                        .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, 
-                                "Không tìm thấy môn học giảng dạy có ID: " + subPublicId));
-                subjects.add(subject);
-            }
-        }
-        teacher.setSubjects(subjects);
+        teacher.setSubjects(resolveSubjects(request.getSubjectPublicIds()));
 
         Teacher savedTeacher = teacherRepository.save(teacher);
         return convertToResponse(savedTeacher);
@@ -114,10 +103,10 @@ public class TeacherServiceImpl
 
     @Override
     @Transactional
+    @Audit(action = "DELETE_TEACHER", entity = "Teacher")
     public void delete(UUID publicId) {
         Teacher teacher = teacherRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, 
-                        "Không tìm thấy giáo viên với ID: " + publicId));
+                .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, publicId));
 
         User user = teacher.getUser();
 
@@ -134,8 +123,7 @@ public class TeacherServiceImpl
     @Transactional(readOnly = true)
     public TeacherResponse getByUserPublicId(UUID userPublicId) {
         Teacher teacher = teacherRepository.findByUserPublicId(userPublicId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, 
-                        "Không tìm thấy giáo viên ứng với tài khoản có ID: " + userPublicId));
+                .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, userPublicId));
         return convertToResponse(teacher);
     }
 
@@ -146,44 +134,27 @@ public class TeacherServiceImpl
 
     @Override
     protected TeacherResponse convertToResponse(Teacher entity) {
-        TeacherResponse response = new TeacherResponse();
-        response.setPublicId(entity.getPublicId());
-        response.setCreatedAt(entity.getCreatedAt());
-        response.setUpdatedAt(entity.getUpdatedAt());
-
-        if (entity.getUser() != null) {
-            response.setUserPublicId(entity.getUser().getPublicId());
-            response.setEmail(entity.getUser().getEmail());
-            response.setFullName(entity.getUser().getFullName());
-            response.setActive(entity.getUser().isActive());
-        }
-
-        response.setPhoneNumber(entity.getPhoneNumber());
-        response.setBio(entity.getBio());
-
-        // Map danh sách môn học sang SubjectResponse DTOs
-        if (entity.getSubjects() != null) {
-            Set<SubjectResponse> subjectResponses = entity.getSubjects().stream()
-                    .map(sub -> {
-                        SubjectResponse subRes = new SubjectResponse();
-                        subRes.setPublicId(sub.getPublicId());
-                        subRes.setCreatedAt(sub.getCreatedAt());
-                        subRes.setUpdatedAt(sub.getUpdatedAt());
-                        subRes.setCode(sub.getCode());
-                        subRes.setName(sub.getName());
-                        subRes.setDescription(sub.getDescription());
-                        return subRes;
-                    })
-                    .collect(Collectors.toSet());
-            response.setSubjects(subjectResponses);
-        }
-
-        return response;
+        return entityMapper.toTeacherResponse(entity);
     }
 
     @Override
     protected void updateEntityFromRequest(Teacher entity, TeacherUpdateRequest request) {
-        // Tương tự, đã xử lý trong hàm update custom
         throw new UnsupportedOperationException("Sử dụng luồng nghiệp vụ custom trong hàm update()");
+    }
+
+    /**
+     * Resolve danh sách subject public IDs thành Set<Subject> entities.
+     * Tái sử dụng giữa create() và update() để tránh duplicate code.
+     */
+    private Set<Subject> resolveSubjects(Set<String> subjectPublicIds) {
+        Set<Subject> subjects = new HashSet<>();
+        if (subjectPublicIds != null && !subjectPublicIds.isEmpty()) {
+            for (String subPublicId : subjectPublicIds) {
+                Subject subject = subjectRepository.findByPublicId(UUID.fromString(subPublicId))
+                        .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, subPublicId));
+                subjects.add(subject);
+            }
+        }
+        return subjects;
     }
 }

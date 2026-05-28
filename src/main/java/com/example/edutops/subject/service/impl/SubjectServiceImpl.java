@@ -2,6 +2,7 @@ package com.example.edutops.subject.service.impl;
 
 import com.example.edutops.common.exception.BusinessException;
 import com.example.edutops.common.exception.ErrorCode;
+import com.example.edutops.common.mapper.EntityMapper;
 import com.example.edutops.common.service.impl.BaseServiceImpl;
 import com.example.edutops.subject.dto.SubjectRequest;
 import com.example.edutops.subject.dto.SubjectResponse;
@@ -10,6 +11,7 @@ import com.example.edutops.subject.repository.SubjectRepository;
 import com.example.edutops.subject.service.SubjectService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.edutops.common.annotation.Audit;
 
 import java.util.UUID;
 
@@ -19,34 +21,35 @@ public class SubjectServiceImpl
         implements SubjectService {
 
     private final SubjectRepository subjectRepository;
+    private final EntityMapper entityMapper;
 
-    public SubjectServiceImpl(SubjectRepository subjectRepository) {
+    public SubjectServiceImpl(SubjectRepository subjectRepository, EntityMapper entityMapper) {
         super(subjectRepository);
         this.subjectRepository = subjectRepository;
+        this.entityMapper = entityMapper;
     }
 
     @Override
     @Transactional
+    @Audit(action = "CREATE_SUBJECT", entity = "Subject")
     public SubjectResponse create(SubjectRequest request) {
         if (subjectRepository.existsByCode(request.getCode())) {
-            throw new BusinessException(ErrorCode.SUBJECT_CODE_ALREADY_EXISTS, 
-                    "Mã môn học '" + request.getCode() + "' đã tồn tại trong hệ thống");
+            throw BusinessException.withDetail(ErrorCode.SUBJECT_CODE_ALREADY_EXISTS, request.getCode());
         }
         return super.create(request);
     }
 
     @Override
     @Transactional
+    @Audit(action = "UPDATE_SUBJECT", entity = "Subject")
     public SubjectResponse update(UUID publicId, SubjectRequest request) {
         Subject entity = subjectRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, 
-                        "Không tìm thấy môn học với ID: " + publicId));
+                .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, publicId));
         
         // Nếu thay đổi code, cần kiểm tra trùng lặp
         if (!entity.getCode().equalsIgnoreCase(request.getCode()) 
                 && subjectRepository.existsByCode(request.getCode())) {
-            throw new BusinessException(ErrorCode.SUBJECT_CODE_ALREADY_EXISTS, 
-                    "Mã môn học '" + request.getCode() + "' đã tồn tại trong hệ thống");
+            throw BusinessException.withDetail(ErrorCode.SUBJECT_CODE_ALREADY_EXISTS, request.getCode());
         }
 
         updateEntityFromRequest(entity, request);
@@ -58,8 +61,7 @@ public class SubjectServiceImpl
     @Transactional(readOnly = true)
     public SubjectResponse getByCode(String code) {
         Subject entity = subjectRepository.findByCode(code)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, 
-                        "Không tìm thấy môn học với mã: " + code));
+                .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, code));
         return convertToResponse(entity);
     }
 
@@ -74,14 +76,7 @@ public class SubjectServiceImpl
 
     @Override
     protected SubjectResponse convertToResponse(Subject entity) {
-        SubjectResponse response = new SubjectResponse();
-        response.setPublicId(entity.getPublicId());
-        response.setCreatedAt(entity.getCreatedAt());
-        response.setUpdatedAt(entity.getUpdatedAt());
-        response.setCode(entity.getCode());
-        response.setName(entity.getName());
-        response.setDescription(entity.getDescription());
-        return response;
+        return entityMapper.toSubjectResponse(entity);
     }
 
     @Override
@@ -89,5 +84,12 @@ public class SubjectServiceImpl
         entity.setCode(request.getCode());
         entity.setName(request.getName());
         entity.setDescription(request.getDescription());
+    }
+
+    @Override
+    @Transactional
+    @Audit(action = "DELETE_SUBJECT", entity = "Subject")
+    public void delete(UUID publicId) {
+        super.delete(publicId);
     }
 }
