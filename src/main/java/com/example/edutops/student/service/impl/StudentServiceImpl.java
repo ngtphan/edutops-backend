@@ -106,6 +106,33 @@ public class StudentServiceImpl
     }
 
     @Override
+    @Transactional
+    public StudentResponse completeProfile(UUID userPublicId, com.example.edutops.student.dto.StudentProfileCompleteRequest request) {
+        User user = userRepository.findByPublicId(userPublicId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, 
+                        "Không tìm thấy tài khoản có ID: " + userPublicId));
+
+        if (user.getRole() != UserRole.STUDENT) {
+            throw new BusinessException(ErrorCode.VALIDATION_FAILED, 
+                    "Chỉ tài khoản học viên mới có quyền hoàn tất hồ sơ học viên");
+        }
+
+        if (studentRepository.findByUserPublicId(userPublicId).isPresent()) {
+            throw new BusinessException(ErrorCode.VALIDATION_FAILED, 
+                    "Hồ sơ học viên đã được hoàn tất trước đó");
+        }
+
+        Student student = new Student();
+        student.setUser(user);
+        student.setPhoneNumber(request.getPhoneNumber());
+        student.setDateOfBirth(request.getDateOfBirth());
+        student.setGender(request.getGender());
+
+        Student savedStudent = studentRepository.save(student);
+        return convertToResponse(savedStudent);
+    }
+
+    @Override
     protected Student convertToEntity(StudentCreateRequest request) {
         // Hàm này không được gọi trực tiếp vì ta đã override hàm 'create' 
         // để xử lý nghiệp vụ tạo liên kết User - Student phức tạp hơn.

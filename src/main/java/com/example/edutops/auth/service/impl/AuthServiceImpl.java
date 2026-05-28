@@ -6,9 +6,8 @@ import com.example.edutops.auth.service.AuthService;
 import com.example.edutops.common.exception.BusinessException;
 import com.example.edutops.common.exception.ErrorCode;
 import com.example.edutops.common.security.JwtProvider;
-import com.example.edutops.student.entity.Gender;
-import com.example.edutops.student.entity.Student;
 import com.example.edutops.student.repository.StudentRepository;
+import com.example.edutops.teacher.repository.TeacherRepository;
 import com.example.edutops.user.entity.User;
 import com.example.edutops.user.entity.UserRole;
 import com.example.edutops.user.repository.UserRepository;
@@ -23,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.time.LocalDate;
 import java.util.Collections;
 
 @Service
@@ -31,6 +29,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final StudentRepository studentRepository;
+    private final TeacherRepository teacherRepository;
     private final JwtProvider jwtProvider;
 
     @Value("${app.google.client-id}")
@@ -38,9 +37,11 @@ public class AuthServiceImpl implements AuthService {
 
     public AuthServiceImpl(UserRepository userRepository, 
                            StudentRepository studentRepository, 
+                           TeacherRepository teacherRepository,
                            JwtProvider jwtProvider) {
         this.userRepository = userRepository;
         this.studentRepository = studentRepository;
+        this.teacherRepository = teacherRepository;
         this.jwtProvider = jwtProvider;
     }
 
@@ -64,26 +65,15 @@ public class AuthServiceImpl implements AuthService {
             String email = payload.getEmail();
             String fullName = (String) payload.get("name");
 
-            // 2. Tìm kiếm hoặc tự động đăng ký mới tài khoản User & Student tương ứng
+            // 2. Tìm kiếm hoặc tự động đăng ký mới tài khoản User tương ứng (Không tạo Student dummy)
             User user = userRepository.findByEmail(email).orElseGet(() -> {
-                // Tạo mới tài khoản User mặc định vai trò học viên
                 User newUser = new User();
                 newUser.setEmail(email);
                 newUser.setFullName(fullName != null ? fullName : "Google User");
                 newUser.setPasswordHash("OAUTH2_EXTERNAL_ACCOUNT");
                 newUser.setRole(UserRole.STUDENT);
                 newUser.setActive(true);
-                User savedUser = userRepository.save(newUser);
-
-                // Tạo kèm profile Student liên kết tương ứng
-                Student student = new Student();
-                student.setUser(savedUser);
-                student.setPhoneNumber(""); // Học viên tự cập nhật sau
-                student.setDateOfBirth(LocalDate.of(2000, 1, 1));
-                student.setGender(Gender.OTHER);
-                studentRepository.save(student);
-
-                return savedUser;
+                return userRepository.save(newUser);
             });
 
             // Nếu tài khoản đã bị khóa
@@ -91,14 +81,23 @@ public class AuthServiceImpl implements AuthService {
                 throw new BusinessException(ErrorCode.INVALID_TOKEN, "Tài khoản của bạn hiện đang bị khóa");
             }
 
-            // 3. Sinh token JWT của hệ thống EduTopS
+            // 3. Kiểm tra xem profile đã hoàn thành hay chưa
+            boolean profileCompleted = true;
+            if (user.getRole() == UserRole.STUDENT) {
+                profileCompleted = studentRepository.findByUserPublicId(user.getPublicId()).isPresent();
+            } else if (user.getRole() == UserRole.TEACHER) {
+                profileCompleted = teacherRepository.findByUserPublicId(user.getPublicId()).isPresent();
+            }
+
+            // 4. Sinh token JWT của hệ thống EduTopS
             String accessToken = jwtProvider.generateToken(user);
 
             return new TokenResponse(
                     accessToken, 
                     user.getEmail(), 
                     user.getFullName(), 
-                    user.getRole().name()
+                    user.getRole().name(),
+                    profileCompleted
             );
 
         } catch (GeneralSecurityException | IOException e) {

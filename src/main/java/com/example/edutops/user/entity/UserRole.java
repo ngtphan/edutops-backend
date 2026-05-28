@@ -12,5 +12,11 @@ public enum UserRole {
     TEACHER,
 
     /** Học viên */
-    STUDENT
+    STUDENT,
+
+    /** Quản lý lớp học */
+    CLASS_MANAGER,
+
+    /** Nhân viên */
+    STAFF
 }

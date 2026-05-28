@@ -10,15 +10,17 @@ public class TokenResponse {
     private String email;
     private String fullName;
     private String role;
+    private boolean profileCompleted;
 
     public TokenResponse() {
     }
 
-    public TokenResponse(String accessToken, String email, String fullName, String role) {
+    public TokenResponse(String accessToken, String email, String fullName, String role, boolean profileCompleted) {
         this.accessToken = accessToken;
         this.email = email;
         this.fullName = fullName;
         this.role = role;
+        this.profileCompleted = profileCompleted;
     }
 
     // --- Getters & Setters ---
@@ -61,5 +63,13 @@ public class TokenResponse {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public boolean isProfileCompleted() {
+        return profileCompleted;
+    }
+
+    public void setProfileCompleted(boolean profileCompleted) {
+        this.profileCompleted = profileCompleted;
     }
 }

@@ -35,6 +35,12 @@ public class CourseCreateRequest {
     @NotNull(message = "{course.status.notnull}")
     private CourseStatus status = CourseStatus.ACTIVE;
 
+    @NotNull(message = "{course.startdate.notnull}")
+    private java.time.LocalDate startDate;
+
+    @NotNull(message = "{course.enddate.notnull}")
+    private java.time.LocalDate endDate;
+
     // --- Getters & Setters ---
 
     public String getCode() {
@@ -91,5 +97,21 @@ public class CourseCreateRequest {
 
     public void setStatus(CourseStatus status) {
         this.status = status;
+    }
+
+    public java.time.LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(java.time.LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public java.time.LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(java.time.LocalDate endDate) {
+        this.endDate = endDate;
     }
 }

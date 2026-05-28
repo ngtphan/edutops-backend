@@ -2,6 +2,7 @@ package com.example.edutops.student.controller;
 
 import com.example.edutops.common.controller.BaseController;
 import com.example.edutops.student.dto.StudentCreateRequest;
+import com.example.edutops.student.dto.StudentProfileCompleteRequest;
 import com.example.edutops.student.dto.StudentResponse;
 import com.example.edutops.student.dto.StudentUpdateRequest;
 import com.example.edutops.student.service.StudentService;
@@ -36,16 +37,16 @@ public class StudentController extends BaseController<StudentCreateRequest, Stud
 
     @Override
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Tạo mới profile học sinh (Chỉ ADMIN)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @Operation(summary = "Tạo mới profile học sinh (ADMIN hoặc STAFF)")
     public ResponseEntity<StudentResponse> create(@Valid @RequestBody StudentCreateRequest request) {
         return super.create(request);
     }
 
     @Override
     @PutMapping("/{publicId}")
-    @PreAuthorize("hasRole('ADMIN') or @securityUtils.isSelfOrAdminStudent(#publicId)")
-    @Operation(summary = "Cập nhật thông tin profile học sinh (ADMIN hoặc chính chủ học sinh)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF') or @securityUtils.isSelfOrAdminStudent(#publicId)")
+    @Operation(summary = "Cập nhật thông tin profile học sinh (ADMIN, STAFF hoặc chính chủ học sinh)")
     public ResponseEntity<StudentResponse> update(
             @PathVariable UUID publicId, 
             @Valid @RequestBody StudentUpdateRequest request) {
@@ -62,25 +63,36 @@ public class StudentController extends BaseController<StudentCreateRequest, Stud
 
     @Override
     @GetMapping("/{publicId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER') or @securityUtils.isSelfOrAdminStudent(#publicId)")
-    @Operation(summary = "Xem chi tiết hồ sơ học sinh (ADMIN, TEACHER hoặc chính chủ học sinh)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'CLASS_MANAGER', 'STAFF') or @securityUtils.isSelfOrAdminStudent(#publicId)")
+    @Operation(summary = "Xem chi tiết hồ sơ học sinh (ADMIN, TEACHER, CLASS_MANAGER, STAFF hoặc chính chủ học sinh)")
     public ResponseEntity<StudentResponse> getByPublicId(@PathVariable UUID publicId) {
         return super.getByPublicId(publicId);
     }
 
     @Override
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
-    @Operation(summary = "Lấy danh sách tất cả học sinh (Chỉ ADMIN, TEACHER)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'CLASS_MANAGER', 'STAFF')")
+    @Operation(summary = "Lấy danh sách tất cả học sinh (ADMIN, TEACHER, CLASS_MANAGER, STAFF)")
     public ResponseEntity<List<StudentResponse>> getAll() {
         return super.getAll();
     }
 
     @GetMapping("/user/{userPublicId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER') or @securityUtils.isSelfOrAdmin(#userPublicId)")
-    @Operation(summary = "Lấy thông tin học viên theo public ID tài khoản liên kết (ADMIN, TEACHER hoặc chính chủ)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'CLASS_MANAGER', 'STAFF') or @securityUtils.isSelfOrAdmin(#userPublicId)")
+    @Operation(summary = "Lấy thông tin học viên theo public ID tài khoản liên kết (ADMIN, TEACHER, CLASS_MANAGER, STAFF hoặc chính chủ)")
     public ResponseEntity<StudentResponse> getByUserPublicId(@PathVariable UUID userPublicId) {
         StudentResponse response = studentService.getByUserPublicId(userPublicId);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/user/{userPublicId}/complete-profile")
+    @PreAuthorize("@securityUtils.isSelfOrAdmin(#userPublicId)")
+    @Operation(summary = "Hoàn tất thông tin profile học sinh (Chính chủ hoặc ADMIN)")
+    public ResponseEntity<StudentResponse> completeProfile(
+            @PathVariable UUID userPublicId,
+            @Valid @RequestBody StudentProfileCompleteRequest request) {
+        StudentResponse response = studentService.completeProfile(userPublicId, request);
+        return ResponseEntity.ok(response);
+    }
 }
+

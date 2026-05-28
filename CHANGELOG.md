@@ -24,22 +24,22 @@ gantt
 
 ---
 
-## [Chưa phát hành - v1.0.0-beta2] - (Core Business Baseline)
+## [v1.0.0-beta2] - 2026-05-28 - (Core Business Baseline)
 
-Phiên bản này tập trung hoàn thiện các nghiệp vụ cơ bản của Giai đoạn 1 (Teacher & Course), tối ưu hóa trải nghiệm đăng nhập Google và chuẩn bị phân quyền chi tiết cho vai trò Quản lý lớp học (`CLASS_MANAGER`) và Nhân viên tư vấn (`STAFF`).
+Phiên bản này hoàn thiện các nghiệp vụ cơ bản của Giai đoạn 1 (Teacher & Course), tối ưu hóa trải nghiệm đăng nhập Google và phân quyền chi tiết cho vai trò Quản lý lớp học (`CLASS_MANAGER`) và Nhân viên tư vấn (`STAFF`).
 
-### Added (Sắp thêm mới)
+### Added (Đã thêm mới)
 * **Khóa học có thời hạn đào tạo**: Bổ sung ngày bắt đầu (`startDate`) và ngày kết thúc (`endDate`) vào thực thể Khóa học (`Course`) kèm theo các ràng buộc kiểm tra nghiệp vụ (`startDate <= endDate`).
 * **Vai trò Nhân sự Mới**: Bổ sung hai vai trò Quản lý lớp học (`CLASS_MANAGER`) và Nhân viên tư vấn/vận hành (`STAFF`) vào hệ thống phân quyền trong `UserRole.java`.
 * **API Hoàn tất hồ sơ cá nhân**: Endpoint `POST /api/v1/students/user/{userPublicId}/complete-profile` bảo mật cao cho phép người dùng tự điền số điện thoại, ngày sinh và giới tính thật sau khi đăng nhập qua Google.
 * **Cấu hình Authorize Swagger UI**: Tích hợp Bearer JWT Token Scheme trực tiếp vào tài liệu Swagger giúp lập trình viên kiểm thử phân quyền REST APIs trực quan.
 
-### Changed (Sắp thay đổi)
+### Changed (Đã thay đổi)
 * **Tối ưu hóa luồng Google Login**: Loại bỏ việc tự động tạo thực thể `Student` với dữ liệu rác (dummy data) ban đầu. Hệ thống sẽ trả về cờ `profileCompleted = false` để thông báo cho Frontend yêu cầu điền hồ sơ thật.
 * **Quyền hạn của Nhân viên (STAFF)**: Cho phép `STAFF` có quyền tạo mới học viên ban đầu và cập nhật thông tin hồ sơ cơ bản cho Học sinh (`Student`).
 * **Phân quyền Đọc Nhân sự**: Cập nhật `@PreAuthorize` trên `StudentController` và `TeacherController` cho phép cả `CLASS_MANAGER` và `STAFF` được quyền đọc hồ sơ nhân sự (Giáo viên, Học viên) để phục vụ cho các nghiệp vụ vận hành, xếp lịch.
 
-### Fixed (Sắp sửa đổi)
+### Fixed (Đã sửa đổi)
 * **Sửa lỗi DDL PostgreSQL**: Khắc phục lỗi không thể chạy tự động cập nhật schema (`alter table add column deleted boolean not null`) trên các bảng đã có dữ liệu cũ bằng cách bổ sung cấu hình `default false` trong thực thể `BaseEntity.java`.
 
 ---

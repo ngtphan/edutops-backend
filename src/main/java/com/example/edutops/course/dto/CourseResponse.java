@@ -15,6 +15,8 @@ public class CourseResponse extends BaseResponse {
     private BigDecimal fee;
     private CourseStatus status;
     private SubjectResponse subject;
+    private java.time.LocalDate startDate;
+    private java.time.LocalDate endDate;
 
     // --- Getters & Setters ---
 
@@ -72,5 +74,21 @@ public class CourseResponse extends BaseResponse {
 
     public void setSubject(SubjectResponse subject) {
         this.subject = subject;
+    }
+
+    public java.time.LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(java.time.LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public java.time.LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(java.time.LocalDate endDate) {
+        this.endDate = endDate;
     }
 }

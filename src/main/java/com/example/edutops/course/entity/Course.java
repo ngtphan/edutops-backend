@@ -62,18 +62,28 @@ public class Course extends BaseEntity {
     @Column(nullable = false, length = 20)
     private CourseStatus status = CourseStatus.ACTIVE;
 
+    @NotNull
+    @Column(nullable = false)
+    private java.time.LocalDate startDate;
+
+    @NotNull
+    @Column(nullable = false)
+    private java.time.LocalDate endDate;
+
     // --- Constructors ---
 
     public Course() {
     }
 
-    public Course(String code, String name, Subject subject, int totalSessions, BigDecimal fee) {
+    public Course(String code, String name, Subject subject, int totalSessions, BigDecimal fee, java.time.LocalDate startDate, java.time.LocalDate endDate) {
         this.code = code;
         this.name = name;
         this.subject = subject;
         this.totalSessions = totalSessions;
         this.fee = fee;
         this.status = CourseStatus.ACTIVE;
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 
     // --- Getters & Setters ---
@@ -132,5 +142,21 @@ public class Course extends BaseEntity {
 
     public void setStatus(CourseStatus status) {
         this.status = status;
+    }
+
+    public java.time.LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(java.time.LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public java.time.LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(java.time.LocalDate endDate) {
+        this.endDate = endDate;
     }
 }

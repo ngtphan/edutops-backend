@@ -39,6 +39,11 @@ public class CourseServiceImpl
                     "Mã khóa học '" + request.getCode() + "' đã tồn tại trong hệ thống");
         }
 
+        if (request.getStartDate().isAfter(request.getEndDate())) {
+            throw new BusinessException(ErrorCode.VALIDATION_FAILED, 
+                    "Ngày bắt đầu khóa học phải trước hoặc bằng ngày kết thúc");
+        }
+
         Subject subject = subjectRepository.findByPublicId(request.getSubjectPublicId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, 
                         "Không tìm thấy môn học liên kết có ID: " + request.getSubjectPublicId()));
@@ -51,6 +56,8 @@ public class CourseServiceImpl
         course.setTotalSessions(request.getTotalSessions());
         course.setFee(request.getFee());
         course.setStatus(request.getStatus());
+        course.setStartDate(request.getStartDate());
+        course.setEndDate(request.getEndDate());
 
         Course savedCourse = courseRepository.save(course);
         return convertToResponse(savedCourse);
@@ -69,6 +76,11 @@ public class CourseServiceImpl
                     "Mã khóa học '" + request.getCode() + "' đã tồn tại trong hệ thống");
         }
 
+        if (request.getStartDate().isAfter(request.getEndDate())) {
+            throw new BusinessException(ErrorCode.VALIDATION_FAILED, 
+                    "Ngày bắt đầu khóa học phải trước hoặc bằng ngày kết thúc");
+        }
+
         Subject subject = subjectRepository.findByPublicId(request.getSubjectPublicId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, 
                         "Không tìm thấy môn học liên kết có ID: " + request.getSubjectPublicId()));
@@ -80,6 +92,8 @@ public class CourseServiceImpl
         course.setTotalSessions(request.getTotalSessions());
         course.setFee(request.getFee());
         course.setStatus(request.getStatus());
+        course.setStartDate(request.getStartDate());
+        course.setEndDate(request.getEndDate());
 
         Course savedCourse = courseRepository.save(course);
         return convertToResponse(savedCourse);
@@ -111,6 +125,8 @@ public class CourseServiceImpl
         response.setTotalSessions(entity.getTotalSessions());
         response.setFee(entity.getFee());
         response.setStatus(entity.getStatus());
+        response.setStartDate(entity.getStartDate());
+        response.setEndDate(entity.getEndDate());
 
         if (entity.getSubject() != null) {
             SubjectResponse subRes = new SubjectResponse();

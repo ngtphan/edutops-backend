@@ -62,7 +62,7 @@ public class TeacherController extends BaseController<TeacherCreateRequest, Teac
 
     @Override
     @GetMapping("/{publicId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT', 'CLASS_MANAGER', 'STAFF')")
     @Operation(summary = "Xem chi tiết hồ sơ giáo viên (Người dùng đã đăng nhập)")
     public ResponseEntity<TeacherResponse> getByPublicId(@PathVariable UUID publicId) {
         return super.getByPublicId(publicId);
@@ -70,15 +70,15 @@ public class TeacherController extends BaseController<TeacherCreateRequest, Teac
 
     @Override
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT', 'CLASS_MANAGER', 'STAFF')")
     @Operation(summary = "Lấy danh sách tất cả giáo viên (Người dùng đã đăng nhập)")
     public ResponseEntity<List<TeacherResponse>> getAll() {
         return super.getAll();
     }
 
     @GetMapping("/user/{userPublicId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER') or @securityUtils.isSelfOrAdmin(#userPublicId)")
-    @Operation(summary = "Lấy thông tin giáo viên theo public ID tài khoản liên kết (ADMIN, TEACHER hoặc chính chủ)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'CLASS_MANAGER', 'STAFF') or @securityUtils.isSelfOrAdmin(#userPublicId)")
+    @Operation(summary = "Lấy thông tin giáo viên theo public ID tài khoản liên kết (ADMIN, TEACHER, CLASS_MANAGER, STAFF hoặc chính chủ)")
     public ResponseEntity<TeacherResponse> getByUserPublicId(@PathVariable UUID userPublicId) {
         TeacherResponse response = teacherService.getByUserPublicId(userPublicId);
         return ResponseEntity.ok(response);
