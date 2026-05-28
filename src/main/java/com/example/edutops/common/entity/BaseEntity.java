@@ -41,7 +41,7 @@ public abstract class BaseEntity {
     @Column(nullable = false)
     private Instant updatedAt;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean deleted = false;
 
     @PrePersist
