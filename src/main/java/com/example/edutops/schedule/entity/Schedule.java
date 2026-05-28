@@ -123,4 +123,20 @@ public class Schedule extends BaseEntity {
     public void setEffectiveTo(LocalDate effectiveTo) {
         this.effectiveTo = effectiveTo;
     }
+
+    /**
+     * Tự xác thực các ràng buộc logic của lịch học (OOP - Rich Domain Model).
+     */
+    public void validate() {
+        if (startTime != null && endTime != null && (startTime.isAfter(endTime) || startTime.equals(endTime))) {
+            throw new com.example.edutops.common.exception.BusinessException(
+                    com.example.edutops.common.exception.ErrorCode.VALIDATION_FAILED, 
+                    "Giờ bắt đầu phải trước giờ kết thúc");
+        }
+        if (effectiveFrom != null && effectiveTo != null && effectiveFrom.isAfter(effectiveTo)) {
+            throw new com.example.edutops.common.exception.BusinessException(
+                    com.example.edutops.common.exception.ErrorCode.VALIDATION_FAILED, 
+                    "Ngày áp dụng lịch học không hợp lệ");
+        }
+    }
 }

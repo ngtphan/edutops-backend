@@ -159,4 +159,15 @@ public class Course extends BaseEntity {
     public void setEndDate(java.time.LocalDate endDate) {
         this.endDate = endDate;
     }
+
+    /**
+     * Tự xác thực các ràng buộc logic của khóa học (OOP - Rich Domain Model).
+     */
+    public void validate() {
+        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+            throw new com.example.edutops.common.exception.BusinessException(
+                    com.example.edutops.common.exception.ErrorCode.VALIDATION_FAILED, 
+                    "Ngày bắt đầu khóa học phải trước hoặc bằng ngày kết thúc");
+        }
+    }
 }

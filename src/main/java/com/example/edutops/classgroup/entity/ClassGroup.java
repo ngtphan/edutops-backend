@@ -128,4 +128,25 @@ public class ClassGroup extends BaseEntity {
     public void setStatus(ClassGroupStatus status) {
         this.status = status;
     }
+
+    /**
+     * Tự xác thực các ràng buộc logic của lớp học (OOP - Rich Domain Model).
+     */
+    public void validate() {
+        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+            throw new com.example.edutops.common.exception.BusinessException(
+                    com.example.edutops.common.exception.ErrorCode.VALIDATION_FAILED, 
+                    "Ngày bắt đầu lớp học phải trước hoặc bằng ngày kết thúc");
+        }
+    }
+
+    /**
+     * Lấy tên giáo viên phụ trách một cách an toàn (OOP - Encapsulation).
+     */
+    public String getTeacherName() {
+        if (this.teacher != null && this.teacher.getUser() != null) {
+            return this.teacher.getUser().getFullName();
+        }
+        return "Giáo viên chưa phân công";
+    }
 }
