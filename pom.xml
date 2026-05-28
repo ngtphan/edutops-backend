@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.example</groupId>
 	<artifactId>edutops</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0-beta2-SNAPSHOT</version>
 	<name>edutops</name>
 	<description/>
 	<url/>
