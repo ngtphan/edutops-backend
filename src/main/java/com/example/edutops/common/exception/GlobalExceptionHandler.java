@@ -1,6 +1,8 @@
 package com.example.edutops.common.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -17,6 +19,8 @@ import java.util.Map;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /**
      * Bắt lỗi Validation dữ liệu đầu vào trên DTO (@Valid).
@@ -46,20 +50,23 @@ public class GlobalExceptionHandler {
 
     /**
      * Bắt lỗi Nghiệp vụ của hệ thống (BusinessException).
+     * HTTP status code được lấy từ {@link ErrorCode#getHttpStatus()} thay vì hardcode BAD_REQUEST.
      */
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(
             BusinessException ex, HttpServletRequest request) {
-        
+
+        HttpStatus httpStatus = ex.getErrorCode().getHttpStatus();
+
         ErrorResponse response = new ErrorResponse();
         response.setTimestamp(Instant.now());
-        response.setStatus(HttpStatus.BAD_REQUEST.value());
+        response.setStatus(httpStatus.value());
         response.setErrorCode(ex.getErrorCode().getCode());
         response.setError("Lỗi Nghiệp Vụ");
         response.setMessage(ex.getMessage());
         response.setPath(request.getRequestURI());
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        return ResponseEntity.status(httpStatus).body(response);
     }
 
     /**
@@ -77,8 +84,8 @@ public class GlobalExceptionHandler {
         response.setMessage(ErrorCode.SYSTEM_ERROR.getDefaultMessage());
         response.setPath(request.getRequestURI());
 
-        // Ghi log lỗi hệ thống để debug
-        ex.printStackTrace();
+        // Sử dụng SLF4J structured logging thay vì ex.printStackTrace()
+        log.error("Unhandled exception at path [{}]: {}", request.getRequestURI(), ex.getMessage(), ex);
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }

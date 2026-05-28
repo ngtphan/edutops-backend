@@ -2,6 +2,7 @@ package com.example.edutops.course.service.impl;
 
 import com.example.edutops.common.exception.BusinessException;
 import com.example.edutops.common.exception.ErrorCode;
+import com.example.edutops.common.mapper.EntityMapper;
 import com.example.edutops.common.service.impl.BaseServiceImpl;
 import com.example.edutops.course.dto.CourseCreateRequest;
 import com.example.edutops.course.dto.CourseResponse;
@@ -9,7 +10,6 @@ import com.example.edutops.course.dto.CourseUpdateRequest;
 import com.example.edutops.course.entity.Course;
 import com.example.edutops.course.repository.CourseRepository;
 import com.example.edutops.course.service.CourseService;
-import com.example.edutops.subject.dto.SubjectResponse;
 import com.example.edutops.subject.entity.Subject;
 import com.example.edutops.subject.repository.SubjectRepository;
 import org.springframework.stereotype.Service;
@@ -24,29 +24,28 @@ public class CourseServiceImpl
 
     private final CourseRepository courseRepository;
     private final SubjectRepository subjectRepository;
+    private final EntityMapper entityMapper;
 
-    public CourseServiceImpl(CourseRepository courseRepository, SubjectRepository subjectRepository) {
+    public CourseServiceImpl(CourseRepository courseRepository, 
+                             SubjectRepository subjectRepository,
+                             EntityMapper entityMapper) {
         super(courseRepository);
         this.courseRepository = courseRepository;
         this.subjectRepository = subjectRepository;
+        this.entityMapper = entityMapper;
     }
 
     @Override
     @Transactional
     public CourseResponse create(CourseCreateRequest request) {
         if (courseRepository.existsByCode(request.getCode())) {
-            throw new BusinessException(ErrorCode.COURSE_CODE_ALREADY_EXISTS, 
-                    "Mã khóa học '" + request.getCode() + "' đã tồn tại trong hệ thống");
+            throw BusinessException.withDetail(ErrorCode.COURSE_CODE_ALREADY_EXISTS, request.getCode());
         }
 
-        if (request.getStartDate().isAfter(request.getEndDate())) {
-            throw new BusinessException(ErrorCode.VALIDATION_FAILED, 
-                    "Ngày bắt đầu khóa học phải trước hoặc bằng ngày kết thúc");
-        }
+        validateDateRange(request);
 
         Subject subject = subjectRepository.findByPublicId(request.getSubjectPublicId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, 
-                        "Không tìm thấy môn học liên kết có ID: " + request.getSubjectPublicId()));
+                .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, request.getSubjectPublicId()));
 
         Course course = new Course();
         course.setCode(request.getCode());
@@ -67,23 +66,17 @@ public class CourseServiceImpl
     @Transactional
     public CourseResponse update(UUID publicId, CourseUpdateRequest request) {
         Course course = courseRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, 
-                        "Không tìm thấy khóa học với ID: " + publicId));
+                .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, publicId));
 
         if (!course.getCode().equalsIgnoreCase(request.getCode()) 
                 && courseRepository.existsByCodeAndPublicIdNot(request.getCode(), publicId)) {
-            throw new BusinessException(ErrorCode.COURSE_CODE_ALREADY_EXISTS, 
-                    "Mã khóa học '" + request.getCode() + "' đã tồn tại trong hệ thống");
+            throw BusinessException.withDetail(ErrorCode.COURSE_CODE_ALREADY_EXISTS, request.getCode());
         }
 
-        if (request.getStartDate().isAfter(request.getEndDate())) {
-            throw new BusinessException(ErrorCode.VALIDATION_FAILED, 
-                    "Ngày bắt đầu khóa học phải trước hoặc bằng ngày kết thúc");
-        }
+        validateDateRange(request);
 
         Subject subject = subjectRepository.findByPublicId(request.getSubjectPublicId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, 
-                        "Không tìm thấy môn học liên kết có ID: " + request.getSubjectPublicId()));
+                .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, request.getSubjectPublicId()));
 
         course.setCode(request.getCode());
         course.setName(request.getName());
@@ -103,8 +96,7 @@ public class CourseServiceImpl
     @Transactional(readOnly = true)
     public CourseResponse getByCode(String code) {
         Course course = courseRepository.findByCode(code)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, 
-                        "Không tìm thấy khóa học với mã: " + code));
+                .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, code));
         return convertToResponse(course);
     }
 
@@ -115,35 +107,29 @@ public class CourseServiceImpl
 
     @Override
     protected CourseResponse convertToResponse(Course entity) {
-        CourseResponse response = new CourseResponse();
-        response.setPublicId(entity.getPublicId());
-        response.setCreatedAt(entity.getCreatedAt());
-        response.setUpdatedAt(entity.getUpdatedAt());
-        response.setCode(entity.getCode());
-        response.setName(entity.getName());
-        response.setDescription(entity.getDescription());
-        response.setTotalSessions(entity.getTotalSessions());
-        response.setFee(entity.getFee());
-        response.setStatus(entity.getStatus());
-        response.setStartDate(entity.getStartDate());
-        response.setEndDate(entity.getEndDate());
-
-        if (entity.getSubject() != null) {
-            SubjectResponse subRes = new SubjectResponse();
-            subRes.setPublicId(entity.getSubject().getPublicId());
-            subRes.setCreatedAt(entity.getSubject().getCreatedAt());
-            subRes.setUpdatedAt(entity.getSubject().getUpdatedAt());
-            subRes.setCode(entity.getSubject().getCode());
-            subRes.setName(entity.getSubject().getName());
-            subRes.setDescription(entity.getSubject().getDescription());
-            response.setSubject(subRes);
-        }
-
-        return response;
+        return entityMapper.toCourseResponse(entity);
     }
 
     @Override
     protected void updateEntityFromRequest(Course entity, CourseUpdateRequest request) {
         throw new UnsupportedOperationException("Sử dụng luồng nghiệp vụ custom trong hàm update()");
+    }
+
+    /**
+     * Kiểm tra ngày bắt đầu phải trước hoặc bằng ngày kết thúc.
+     * Tránh duplicate logic giữa create() và update().
+     */
+    private void validateDateRange(CourseCreateRequest request) {
+        if (request.getStartDate().isAfter(request.getEndDate())) {
+            throw new BusinessException(ErrorCode.VALIDATION_FAILED, 
+                    "Ngày bắt đầu khóa học phải trước hoặc bằng ngày kết thúc");
+        }
+    }
+
+    private void validateDateRange(CourseUpdateRequest request) {
+        if (request.getStartDate().isAfter(request.getEndDate())) {
+            throw new BusinessException(ErrorCode.VALIDATION_FAILED, 
+                    "Ngày bắt đầu khóa học phải trước hoặc bằng ngày kết thúc");
+        }
     }
 }

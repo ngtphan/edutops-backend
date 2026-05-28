@@ -55,8 +55,7 @@ public abstract class BaseServiceImpl<CRE, UPD, RES, T extends BaseEntity>
     @Transactional
     public RES update(UUID publicId, UPD request) {
         T entity = repository.findByPublicId(publicId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, 
-                        "Không tìm thấy tài nguyên yêu cầu với ID: " + publicId));
+                .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, publicId));
         updateEntityFromRequest(entity, request);
         T saved = repository.save(entity);
         return convertToResponse(saved);
@@ -66,8 +65,7 @@ public abstract class BaseServiceImpl<CRE, UPD, RES, T extends BaseEntity>
     @Transactional(readOnly = true)
     public RES getByPublicId(UUID publicId) {
         T entity = repository.findByPublicId(publicId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, 
-                        "Không tìm thấy tài nguyên yêu cầu với ID: " + publicId));
+                .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, publicId));
         return convertToResponse(entity);
     }
 
@@ -83,8 +81,7 @@ public abstract class BaseServiceImpl<CRE, UPD, RES, T extends BaseEntity>
     @Transactional
     public void delete(UUID publicId) {
         T entity = repository.findByPublicId(publicId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, 
-                        "Không tìm thấy tài nguyên yêu cầu với ID: " + publicId));
+                .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, publicId));
         repository.delete(entity);
     }
 }
