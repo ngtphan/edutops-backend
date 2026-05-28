@@ -767,6 +767,395 @@
                         <td class="col-role role-teacher"><span class="badge badge-all">All</span></td>
                         <td class="col-role role-student"><span class="badge badge-all">All</span></td>
                         <td class="col-role role-owner"><span class="badge badge-all">All</span></td>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section 5: Room module -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-title">
+                <span class="section-icon"></span>
+                <span>5. Phân hệ Phòng học (`Room`)</span>
+            </div>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-feature">Chức năng</th>
+                        <th class="col-api">Phương thức & API Endpoint</th>
+                        <th class="col-role role-admin">ADMIN</th>
+                        <th class="col-role role-staff">STAFF</th>
+                        <th class="col-role role-manager">CLASS_MGR</th>
+                        <th class="col-role role-teacher">TEACHER</th>
+                        <th class="col-role role-student">STUDENT</th>
+                        <th class="col-role role-owner">OWNER</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="col-feature">Tạo mới phòng học</td>
+                        <td class="col-api"><span class="method method-post">POST</span>/api/v1/rooms</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Cập nhật phòng học</td>
+                        <td class="col-api"><span class="method method-put">PUT</span>/api/v1/rooms/{id}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xóa phòng học</td>
+                        <td class="col-api"><span class="method method-delete">DELETE</span>/api/v1/rooms/{id}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xem chi tiết phòng học</td>
+                        <td class="col-api"><span class="method method-get">GET</span>/api/v1/rooms/{id}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xem danh sách phòng học</td>
+                        <td class="col-api"><span class="method method-get">GET</span>/api/v1/rooms</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section 6: ClassGroup module -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-title">
+                <span class="section-icon"></span>
+                <span>6. Phân hệ Lớp học (`ClassGroup`)</span>
+            </div>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-feature">Chức năng</th>
+                        <th class="col-api">Phương thức & API Endpoint</th>
+                        <th class="col-role role-admin">ADMIN</th>
+                        <th class="col-role role-staff">STAFF</th>
+                        <th class="col-role role-manager">CLASS_MGR</th>
+                        <th class="col-role role-teacher">TEACHER</th>
+                        <th class="col-role role-student">STUDENT</th>
+                        <th class="col-role role-owner">OWNER</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="col-feature">Tạo mới lớp học</td>
+                        <td class="col-api"><span class="method method-post">POST</span>/api/v1/class-groups</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Cập nhật lớp học</td>
+                        <td class="col-api"><span class="method method-put">PUT</span>/api/v1/class-groups/{id}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xóa lớp học</td>
+                        <td class="col-api"><span class="method method-delete">DELETE</span>/api/v1/class-groups/{id}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xem chi tiết lớp học</td>
+                        <td class="col-api"><span class="method method-get">GET</span>/api/v1/class-groups/{id}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xem danh sách lớp học</td>
+                        <td class="col-api"><span class="method method-get">GET</span>/api/v1/class-groups</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section 7: Enrollment module -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-title">
+                <span class="section-icon"></span>
+                <span>7. Phân hệ Ghi danh (`Enrollment`)</span>
+            </div>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-feature">Chức năng</th>
+                        <th class="col-api">Phương thức & API Endpoint</th>
+                        <th class="col-role role-admin">ADMIN</th>
+                        <th class="col-role role-staff">STAFF</th>
+                        <th class="col-role role-manager">CLASS_MGR</th>
+                        <th class="col-role role-teacher">TEACHER</th>
+                        <th class="col-role role-student">STUDENT</th>
+                        <th class="col-role role-owner">OWNER</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="col-feature">Ghi danh học viên</td>
+                        <td class="col-api"><span class="method method-post">POST</span>/api/v1/enrollments</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-self">Self</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Duyệt/Sửa trạng thái ghi danh</td>
+                        <td class="col-api"><span class="method method-put">PUT</span>/api/v1/enrollments/{id}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xóa ghi danh học viên</td>
+                        <td class="col-api"><span class="method method-delete">DELETE</span>/api/v1/enrollments/{id}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xem danh sách ghi danh toàn bộ</td>
+                        <td class="col-api"><span class="method method-get">GET</span>/api/v1/enrollments</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xem ghi danh của học viên</td>
+                        <td class="col-api"><span class="method method-get">GET</span>/api/v1/enrollments/student/{studentId}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-self">Self</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xem học viên thuộc lớp học</td>
+                        <td class="col-api"><span class="method method-get">GET</span>/api/v1/enrollments/class-group/{id}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section 8: Schedule module -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-title">
+                <span class="section-icon"></span>
+                <span>8. Phân hệ Lịch học & Thời khóa biểu (`Schedule`)</span>
+            </div>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-feature">Chức năng</th>
+                        <th class="col-api">Phương thức & API Endpoint</th>
+                        <th class="col-role role-admin">ADMIN</th>
+                        <th class="col-role role-staff">STAFF</th>
+                        <th class="col-role role-manager">CLASS_MGR</th>
+                        <th class="col-role role-teacher">TEACHER</th>
+                        <th class="col-role role-student">STUDENT</th>
+                        <th class="col-role role-owner">OWNER</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="col-feature">Xếp lịch/Sửa lịch học</td>
+                        <td class="col-api"><span class="method method-post">POST</span>/api/v1/schedules (hoặc PUT)</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xóa lịch học</td>
+                        <td class="col-api"><span class="method method-delete">DELETE</span>/api/v1/schedules/{id}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xem chi tiết/Toàn bộ lịch</td>
+                        <td class="col-api"><span class="method method-get">GET</span>/api/v1/schedules</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xem thời khóa biểu lớp</td>
+                        <td class="col-api"><span class="method method-get">GET</span>/api/v1/schedules/class-group/{id}</td>
+                        <td class="col-role role-admin"><span class="badge badge-all">All</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-all">All</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-all">All</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-all">All</span></td>
+                        <td class="col-role role-student"><span class="badge badge-all">All</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-all">All</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section 9: Attendance module -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-title">
+                <span class="section-icon"></span>
+                <span>9. Phân hệ Điểm danh (`Attendance`)</span>
+            </div>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-feature">Chức năng</th>
+                        <th class="col-api">Phương thức & API Endpoint</th>
+                        <th class="col-role role-admin">ADMIN</th>
+                        <th class="col-role role-staff">STAFF</th>
+                        <th class="col-role role-manager">CLASS_MGR</th>
+                        <th class="col-role role-teacher">TEACHER</th>
+                        <th class="col-role role-student">STUDENT</th>
+                        <th class="col-role role-owner">OWNER</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="col-feature">Điểm danh/Sửa điểm danh</td>
+                        <td class="col-api"><span class="method method-post">POST</span>/api/v1/attendances (hoặc PUT)</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xóa bản ghi điểm danh</td>
+                        <td class="col-api"><span class="method method-delete">DELETE</span>/api/v1/attendances/{id}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xem toàn bộ danh sách điểm danh</td>
+                        <td class="col-api"><span class="method method-get">GET</span>/api/v1/attendances</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Lọc bảng điểm danh theo lớp</td>
+                        <td class="col-api"><span class="method method-get">GET</span>/api/v1/attendances/schedule/{id}/date/{d}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xem lịch sử điểm danh học sinh</td>
+                        <td class="col-api"><span class="method method-get">GET</span>/api/v1/attendances/student/{studentId}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-student"><span class="badge badge-self">Self</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
                     </tr>
                 </tbody>
             </table>

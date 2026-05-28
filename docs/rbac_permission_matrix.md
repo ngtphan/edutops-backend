@@ -81,6 +81,62 @@ Tài liệu này cung cấp cái nhìn trực quan và chính xác về quyền 
 
 ---
 
+### 6. Phân hệ Phòng học (`Room`)
+
+| Chức năng | API | ADMIN | STAFF | CLASS_MANAGER | TEACHER | STUDENT |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| Tạo/Sửa phòng học | `POST/PUT /api/v1/rooms` | **`✓`** | **`✗`** | **`✓`** | **`✗`** | **`✗`** |
+| Xóa phòng học | `DELETE /api/v1/rooms/{id}` | **`✓`** | **`✗`** | **`✗`** | **`✗`** | **`✗`** |
+| Xem danh sách/Chi tiết | `GET /api/v1/rooms` | **`✓`** | **`✓`** | **`✓`** | **`✓`** | **`✗`** |
+
+---
+
+### 7. Phân hệ Lớp học (`ClassGroup`)
+
+| Chức năng | API | ADMIN | STAFF | CLASS_MANAGER | TEACHER | STUDENT |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| Tạo/Sửa lớp học | `POST/PUT /api/v1/class-groups` | **`✓`** | **`✗`** | **`✓`** | **`✗`** | **`✗`** |
+| Xóa lớp học | `DELETE /api/v1/class-groups/{id}` | **`✓`** | **`✗`** | **`✗`** | **`✗`** | **`✗`** |
+| Xem danh sách/Chi tiết | `GET /api/v1/class-groups` | **`✓`** | **`✓`** | **`✓`** | **`✓`** | **`✗`** |
+
+---
+
+### 8. Phân hệ Ghi danh (`Enrollment`)
+
+| Chức năng | API | ADMIN | STAFF | CLASS_MANAGER | TEACHER | STUDENT |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| Đăng ký ghi danh học viên | `POST /api/v1/enrollments` | **`✓`** | **`✓`** | **`✓`** | **`✗`** | **`Self`** |
+| Duyệt/Sửa trạng thái ghi danh | `PUT /api/v1/enrollments/{id}` | **`✓`** | **`✗`** | **`✓`** | **`✗`** | **`✗`** |
+| Xóa ghi danh học viên | `DELETE /api/v1/enrollments/{id}` | **`✓`** | **`✗`** | **`✗`** | **`✗`** | **`✗`** |
+| Xem danh sách toàn bộ | `GET /api/v1/enrollments` | **`✓`** | **`✓`** | **`✓`** | **`✗`** | **`✗`** |
+| Xem ghi danh của học viên | `GET /api/v1/enrollments/student/{studentId}`| **`✓`** | **`✓`** | **`✓`** | **`✗`** | **`Self`** |
+| Xem học viên thuộc lớp học | `GET /api/v1/enrollments/class-group/{id}` | **`✓`** | **`✓`** | **`✓`** | **`✓`** | **`✗`** |
+
+---
+
+### 9. Phân hệ Lịch học & Thời khóa biểu (`Schedule`)
+
+| Chức năng | API | ADMIN | STAFF | CLASS_MANAGER | TEACHER | STUDENT |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| Xếp lịch/Sửa lịch học | `POST/PUT /api/v1/schedules` | **`✓`** | **`✗`** | **`✓`** | **`✗`** | **`✗`** |
+| Xóa lịch học | `DELETE /api/v1/schedules/{id}` | **`✓`** | **`✗`** | **`✗`** | **`✗`** | **`✗`** |
+| Xem chi tiết/Toàn bộ lịch | `GET /api/v1/schedules` | **`✓`** | **`✓`** | **`✓`** | **`✓`** | **`✗`** |
+| Xem thời khóa biểu lớp | `GET /api/v1/schedules/class-group/{id}` | **`All`** | **`All`** | **`All`** | **`All`** | **`All`** |
+
+---
+
+### 10. Phân hệ Điểm danh (`Attendance`)
+
+| Chức năng | API | ADMIN | STAFF | CLASS_MANAGER | TEACHER | STUDENT |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| Điểm danh/Sửa điểm danh | `POST/PUT /api/v1/attendances` | **`✓`** | **`✗`** | **`✓`** | **`✓`** | **`✗`** |
+| Xóa bản ghi điểm danh | `DELETE /api/v1/attendances/{id}` | **`✓`** | **`✗`** | **`✗`** | **`✗`** | **`✗`** |
+| Xem danh sách toàn bộ | `GET /api/v1/attendances` | **`✓`** | **`✗`** | **`✓`** | **`✓`** | **`✗`** |
+| Lọc bảng điểm danh theo lớp | `GET /api/v1/attendances/schedule/{id}/date/{d}`| **`✓`** | **`✗`** | **`✓`** | **`✓`** | **`✗`** |
+| Xem lịch sử điểm danh cá nhân | `GET /api/v1/attendances/student/{studentId}`| **`✓`** | **`✗`** | **`✓`** | **`✓`** | **`Self`** |
+
+---
+
 ## 💡 Điểm Nổi bật trong Kiến trúc Bảo mật
 
 1. **Phân quyền Độc lập cho Vận hành & Quản lý**:
