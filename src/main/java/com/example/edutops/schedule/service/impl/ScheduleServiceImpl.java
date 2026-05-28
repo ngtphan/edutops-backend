@@ -51,9 +51,6 @@ public class ScheduleServiceImpl
         Room room = roomRepository.findByPublicId(request.getRoomPublicId())
                 .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, request.getRoomPublicId()));
 
-        validateTimeRange(request.getStartTime(), request.getEndTime());
-        validateEffectiveDateRange(request.getEffectiveFrom(), request.getEffectiveTo());
-
         // 1. Kiểm tra trùng phòng học
         if (scheduleRepository.existsConflictingRoomSchedule(
                 room.getId(), request.getDayOfWeek(), request.getStartTime(), request.getEndTime())) {
@@ -63,7 +60,7 @@ public class ScheduleServiceImpl
         // 2. Kiểm tra trùng lịch giảng dạy của giáo viên
         if (scheduleRepository.existsConflictingTeacherSchedule(
                 classGroup.getTeacher().getId(), request.getDayOfWeek(), request.getStartTime(), request.getEndTime())) {
-            String teacherName = resolveTeacherName(classGroup);
+            String teacherName = classGroup.getTeacherName();
             throw BusinessException.withDetail(ErrorCode.SCHEDULE_CONFLICT, "Giáo viên: " + teacherName);
         }
 
@@ -75,6 +72,8 @@ public class ScheduleServiceImpl
         schedule.setEndTime(request.getEndTime());
         schedule.setEffectiveFrom(request.getEffectiveFrom());
         schedule.setEffectiveTo(request.getEffectiveTo());
+
+        schedule.validate(); // Tự động kiểm tra ràng buộc bằng OOP!
 
         Schedule saved = scheduleRepository.save(schedule);
         return convertToResponse(saved);
@@ -89,9 +88,6 @@ public class ScheduleServiceImpl
         Room room = roomRepository.findByPublicId(request.getRoomPublicId())
                 .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, request.getRoomPublicId()));
 
-        validateTimeRange(request.getStartTime(), request.getEndTime());
-        validateEffectiveDateRange(request.getEffectiveFrom(), request.getEffectiveTo());
-
         // 1. Kiểm tra trùng phòng học (loại trừ chính nó)
         if (scheduleRepository.existsConflictingRoomScheduleExcludingSelf(
                 room.getId(), request.getDayOfWeek(), request.getStartTime(), request.getEndTime(), publicId)) {
@@ -101,7 +97,7 @@ public class ScheduleServiceImpl
         // 2. Kiểm tra trùng lịch giảng dạy của giáo viên (loại trừ chính nó)
         if (scheduleRepository.existsConflictingTeacherSchedulesExcludingSelf(
                 schedule.getClassGroup().getTeacher().getId(), request.getDayOfWeek(), request.getStartTime(), request.getEndTime(), publicId)) {
-            String teacherName = resolveTeacherName(schedule.getClassGroup());
+            String teacherName = schedule.getClassGroup().getTeacherName();
             throw BusinessException.withDetail(ErrorCode.SCHEDULE_CONFLICT, "Giáo viên: " + teacherName);
         }
 
@@ -111,6 +107,8 @@ public class ScheduleServiceImpl
         schedule.setEndTime(request.getEndTime());
         schedule.setEffectiveFrom(request.getEffectiveFrom());
         schedule.setEffectiveTo(request.getEffectiveTo());
+
+        schedule.validate(); // Tự động kiểm tra ràng buộc bằng OOP!
 
         Schedule saved = scheduleRepository.save(schedule);
         return convertToResponse(saved);
@@ -148,35 +146,4 @@ public class ScheduleServiceImpl
     @Override
     protected void updateEntityFromRequest(Schedule entity, ScheduleUpdateRequest request) {
         throw new UnsupportedOperationException("Sử dụng luồng nghiệp vụ custom trong hàm update()");
-    }
-
-    // ========== Private Helper Methods ==========
-
-    /**
-     * Kiểm tra giờ bắt đầu phải trước giờ kết thúc.
-     */
-    private void validateTimeRange(java.time.LocalTime startTime, java.time.LocalTime endTime) {
-        if (startTime.isAfter(endTime) || startTime.equals(endTime)) {
-            throw new BusinessException(ErrorCode.VALIDATION_FAILED, "Giờ bắt đầu phải trước giờ kết thúc");
-        }
-    }
-
-    /**
-     * Kiểm tra ngày áp dụng lịch học hợp lệ.
-     */
-    private void validateEffectiveDateRange(java.time.LocalDate effectiveFrom, java.time.LocalDate effectiveTo) {
-        if (effectiveTo != null && effectiveFrom != null && effectiveFrom.isAfter(effectiveTo)) {
-            throw new BusinessException(ErrorCode.VALIDATION_FAILED, "Ngày áp dụng lịch học không hợp lệ");
-        }
-    }
-
-    /**
-     * Lấy tên giáo viên an toàn (null-safe).
-     */
-    private String resolveTeacherName(ClassGroup classGroup) {
-        if (classGroup.getTeacher() != null && classGroup.getTeacher().getUser() != null) {
-            return classGroup.getTeacher().getUser().getFullName();
-        }
-        return "Giáo viên";
-    }
-}
+    }}

@@ -42,8 +42,6 @@ public class CourseServiceImpl
             throw BusinessException.withDetail(ErrorCode.COURSE_CODE_ALREADY_EXISTS, request.getCode());
         }
 
-        validateDateRange(request);
-
         Subject subject = subjectRepository.findByPublicId(request.getSubjectPublicId())
                 .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, request.getSubjectPublicId()));
 
@@ -57,6 +55,8 @@ public class CourseServiceImpl
         course.setStatus(request.getStatus());
         course.setStartDate(request.getStartDate());
         course.setEndDate(request.getEndDate());
+
+        course.validate(); // Tự động kiểm tra ràng buộc bằng OOP!
 
         Course savedCourse = courseRepository.save(course);
         return convertToResponse(savedCourse);
@@ -73,8 +73,6 @@ public class CourseServiceImpl
             throw BusinessException.withDetail(ErrorCode.COURSE_CODE_ALREADY_EXISTS, request.getCode());
         }
 
-        validateDateRange(request);
-
         Subject subject = subjectRepository.findByPublicId(request.getSubjectPublicId())
                 .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, request.getSubjectPublicId()));
 
@@ -87,6 +85,8 @@ public class CourseServiceImpl
         course.setStatus(request.getStatus());
         course.setStartDate(request.getStartDate());
         course.setEndDate(request.getEndDate());
+
+        course.validate(); // Tự động kiểm tra ràng buộc bằng OOP!
 
         Course savedCourse = courseRepository.save(course);
         return convertToResponse(savedCourse);
@@ -115,21 +115,4 @@ public class CourseServiceImpl
         throw new UnsupportedOperationException("Sử dụng luồng nghiệp vụ custom trong hàm update()");
     }
 
-    /**
-     * Kiểm tra ngày bắt đầu phải trước hoặc bằng ngày kết thúc.
-     * Tránh duplicate logic giữa create() và update().
-     */
-    private void validateDateRange(CourseCreateRequest request) {
-        if (request.getStartDate().isAfter(request.getEndDate())) {
-            throw new BusinessException(ErrorCode.VALIDATION_FAILED, 
-                    "Ngày bắt đầu khóa học phải trước hoặc bằng ngày kết thúc");
-        }
-    }
-
-    private void validateDateRange(CourseUpdateRequest request) {
-        if (request.getStartDate().isAfter(request.getEndDate())) {
-            throw new BusinessException(ErrorCode.VALIDATION_FAILED, 
-                    "Ngày bắt đầu khóa học phải trước hoặc bằng ngày kết thúc");
-        }
-    }
 }

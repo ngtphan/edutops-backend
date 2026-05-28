@@ -55,8 +55,6 @@ public class ClassGroupServiceImpl
         Teacher teacher = teacherRepository.findByPublicId(request.getTeacherPublicId())
                 .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, request.getTeacherPublicId()));
 
-        validateDateRange(request.getStartDate(), request.getEndDate());
-
         ClassGroup classGroup = new ClassGroup();
         classGroup.setCode(request.getCode());
         classGroup.setCourse(course);
@@ -65,6 +63,8 @@ public class ClassGroupServiceImpl
         classGroup.setEndDate(request.getEndDate());
         classGroup.setMaxStudents(request.getMaxStudents());
         classGroup.setStatus(ClassGroupStatus.OPEN);
+
+        classGroup.validate(); // Tự động kiểm tra ràng buộc bằng OOP!
 
         ClassGroup saved = classGroupRepository.save(classGroup);
         return convertToResponse(saved);
@@ -87,8 +87,6 @@ public class ClassGroupServiceImpl
         Teacher teacher = teacherRepository.findByPublicId(request.getTeacherPublicId())
                 .orElseThrow(() -> BusinessException.withDetail(ErrorCode.RESOURCE_NOT_FOUND, request.getTeacherPublicId()));
 
-        validateDateRange(request.getStartDate(), request.getEndDate());
-
         classGroup.setCode(request.getCode());
         classGroup.setCourse(course);
         classGroup.setTeacher(teacher);
@@ -96,6 +94,8 @@ public class ClassGroupServiceImpl
         classGroup.setEndDate(request.getEndDate());
         classGroup.setMaxStudents(request.getMaxStudents());
         classGroup.setStatus(request.getStatus());
+
+        classGroup.validate(); // Tự động kiểm tra ràng buộc bằng OOP!
 
         ClassGroup saved = classGroupRepository.save(classGroup);
         return convertToResponse(saved);
@@ -116,13 +116,4 @@ public class ClassGroupServiceImpl
         throw new UnsupportedOperationException("Sử dụng luồng nghiệp vụ custom trong hàm update()");
     }
 
-    /**
-     * Kiểm tra ngày bắt đầu phải trước hoặc bằng ngày kết thúc.
-     */
-    private void validateDateRange(LocalDate startDate, LocalDate endDate) {
-        if (endDate != null && startDate.isAfter(endDate)) {
-            throw new BusinessException(ErrorCode.VALIDATION_FAILED,
-                    "Ngày bắt đầu lớp học phải trước hoặc bằng ngày kết thúc");
-        }
-    }
 }
