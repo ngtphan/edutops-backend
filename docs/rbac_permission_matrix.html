@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduTopS - Ma Trận Phân Quyền RBAC</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.15);
+            
+            --success: #10b981;
+            --success-bg: rgba(16, 185, 129, 0.12);
+            --danger: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.12);
+            --warning: #f59e0b;
+            --warning-bg: rgba(245, 158, 11, 0.12);
+            --info: #06b6d4;
+            --info-bg: rgba(6, 182, 212, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2.5rem 1.5rem;
+            line-height: 1.6;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .logo-area {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 100px;
+            color: #a5b4fc;
+            font-weight: 600;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, #cbd5e1 50%, #6366f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Legend & Toolbar */
+        .toolbar {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(16px);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.5rem;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            background: rgba(15, 23, 42, 0.6);
+            padding: 0.35rem 0.75rem;
+            border-radius: 100px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-allow {
+            background-color: var(--success-bg);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .badge-deny {
+            background-color: var(--danger-bg);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            opacity: 0.6;
+        }
+
+        .badge-self {
+            background-color: var(--warning-bg);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .badge-all {
+            background-color: var(--info-bg);
+            color: var(--info);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+        }
+
+        /* Interactive Highlights */
+        .highlight-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .highlight-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .role-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-secondary);
+            padding: 0.4rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .role-btn:hover {
+            background: rgba(99, 102, 241, 0.08);
+            border-color: rgba(99, 102, 241, 0.3);
+            color: #fff;
+        }
+
+        .role-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+            box-shadow: 0 0 12px var(--primary-glow);
+        }
+
+        /* Matrix Tables */
+        .section-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-icon {
+            width: 8px;
+            height: 24px;
+            background: var(--primary);
+            border-radius: 4px;
+            box-shadow: 0 0 8px var(--primary);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.925rem;
+        }
+
+        th {
+            background-color: rgba(15, 23, 42, 0.7);
+            color: #e2e8f0;
+            font-weight: 700;
+            padding: 1rem 1.25rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.06);
+            letter-spacing: 0.02em;
+        }
+
+        td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: #cbd5e1;
+            transition: all 0.15s ease;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: rgba(255, 255, 255, 0.02);
+            color: #fff;
+        }
+
+        /* Column Specific Styling */
+        .col-feature {
+            font-weight: 600;
+            color: #f1f5f9;
+            min-width: 180px;
+        }
+
+        .col-api {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #a5b4fc;
+            min-width: 250px;
+        }
+
+        .col-role {
+            text-align: center;
+            width: 110px;
+        }
+
+        th.col-role {
+            text-align: center;
+        }
+
+        /* Highlight classes */
+        td.highlight-col {
+            background-color: rgba(99, 102, 241, 0.05) !important;
+            border-left: 1px dashed rgba(99, 102, 241, 0.15);
+            border-right: 1px dashed rgba(99, 102, 241, 0.15);
+        }
+
+        th.highlight-col {
+            background-color: rgba(99, 102, 241, 0.15) !important;
+        }
+
+        /* HTTP Methods styles inside API column */
+        .method {
+            display: inline-block;
+            font-weight: 700;
+            font-size: 0.7rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            margin-right: 0.5rem;
+        }
+
+        .method-get { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+        .method-post { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+        .method-put { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+        .method-delete { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+
+        /* Footer */
+        footer {
+            margin-top: 4rem;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        footer p {
+            margin-bottom: 0.5rem;
+        }
+
+        .pulse {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            margin-right: 6px;
+            box-shadow: 0 0 8px var(--success);
+            animation: pulse-animation 2s infinite;
+        }
+
+        @keyframes pulse-animation {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="logo-area">
+            <span class="pulse"></span>EduTopS Education System
+        </div>
+        <h1>Ma Trận Phân Quyền Bảo Mật (RBAC)</h1>
+        <p class="subtitle">Bản đồ phân phối quyền hạn truy cập API chuẩn hóa theo thiết kế Giai đoạn 1 & Giai đoạn 2 nâng cao.</p>
+    </header>
+
+    <!-- Legend and Interaction Toolbar -->
+    <div class="toolbar">
+        <div class="legend">
+            <div class="legend-item">
+                <span class="badge badge-allow">✓</span> Có Quyền Truy Cập
+            </div>
+            <div class="legend-item">
+                <span class="badge badge-self">Self</span> Chỉ Tài Nguyên Chính Chủ
+            </div>
+            <div class="legend-item">
+                <span class="badge badge-all">All</span> Đã Đăng Nhập
+            </div>
+            <div class="legend-item">
+                <span class="badge badge-deny">✗</span> Bị Chặn Quyền
+            </div>
+        </div>
+
+        <div class="highlight-controls">
+            <span class="highlight-label">Tập trung xem vai trò:</span>
+            <button class="role-btn" onclick="highlightRole('admin', 2)">ADMIN</button>
+            <button class="role-btn" onclick="highlightRole('staff', 3)">STAFF</button>
+            <button class="role-btn" onclick="highlightRole('manager', 4)">CLASS_MANAGER</button>
+            <button class="role-btn" onclick="highlightRole('teacher', 5)">TEACHER</button>
+            <button class="role-btn" onclick="highlightRole('student', 6)">STUDENT</button>
+            <button class="role-btn" onclick="highlightRole('owner', 7)">OWNER</button>
+            <button class="role-btn active" onclick="resetHighlight()">TẤT CẢ</button>
+        </div>
+    </div>
+
+    <!-- Section 1: User management -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-title">
+                <span class="section-icon"></span>
+                <span>1. Phân hệ Tài khoản (`User`)</span>
+            </div>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-feature">Chức năng</th>
+                        <th class="col-api">Phương thức & API Endpoint</th>
+                        <th class="col-role role-admin">ADMIN</th>
+                        <th class="col-role role-staff">STAFF</th>
+                        <th class="col-role role-manager">CLASS_MGR</th>
+                        <th class="col-role role-teacher">TEACHER</th>
+                        <th class="col-role role-student">STUDENT</th>
+                        <th class="col-role role-owner">OWNER</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="col-feature">Tạo mới tài khoản</td>
+                        <td class="col-api"><span class="method method-post">POST</span>/api/v1/users</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Cập nhật tài khoản</td>
+                        <td class="col-api"><span class="method method-put">PUT</span>/api/v1/users/{id}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xóa tài khoản</td>
+                        <td class="col-api"><span class="method method-delete">DELETE</span>/api/v1/users/{id}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Lấy chi tiết tài khoản</td>
+                        <td class="col-api"><span class="method method-get">GET</span>/api/v1/users/{id}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xem danh sách tài khoản</td>
+                        <td class="col-api"><span class="method method-get">GET</span>/api/v1/users</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Tìm bằng Email</td>
+                        <td class="col-api"><span class="method method-get">GET</span>/api/v1/users/email/{email}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xem tài khoản hiện tại</td>
+                        <td class="col-api"><span class="method method-get">GET</span>/api/v1/users/me</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-self">Self</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section 2: Student module -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-title">
+                <span class="section-icon"></span>
+                <span>2. Phân hệ Học viên (`Student`)</span>
+            </div>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-feature">Chức năng</th>
+                        <th class="col-api">Phương thức & API Endpoint</th>
+                        <th class="col-role role-admin">ADMIN</th>
+                        <th class="col-role role-staff">STAFF</th>
+                        <th class="col-role role-manager">CLASS_MGR</th>
+                        <th class="col-role role-teacher">TEACHER</th>
+                        <th class="col-role role-student">STUDENT</th>
+                        <th class="col-role role-owner">OWNER</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="col-feature">Tạo hồ sơ học sinh</td>
+                        <td class="col-api"><span class="method method-post">POST</span>/api/v1/students</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Cập nhật hồ sơ học sinh</td>
+                        <td class="col-api"><span class="method method-put">PUT</span>/api/v1/students/{id}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-self">Self</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Hoàn tất hồ sơ cá nhân</td>
+                        <td class="col-api"><span class="method method-post">POST</span>/api/v1/students/user/{userId}/complete-profile</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-self">Self</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xóa hồ sơ học sinh</td>
+                        <td class="col-api"><span class="method method-delete">DELETE</span>/api/v1/students/{id}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xem chi tiết học sinh</td>
+                        <td class="col-api"><span class="method method-get">GET</span>/api/v1/students/{id}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-self">Self</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xem danh sách học sinh</td>
+                        <td class="col-api"><span class="method method-get">GET</span>/api/v1/students</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Tìm bằng User ID</td>
+                        <td class="col-api"><span class="method method-get">GET</span>/api/v1/students/user/{userId}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-self">Self</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section 3: Teacher module -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-title">
+                <span class="section-icon"></span>
+                <span>3. Phân hệ Giáo viên (`Teacher`)</span>
+            </div>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-feature">Chức năng</th>
+                        <th class="col-api">Phương thức & API Endpoint</th>
+                        <th class="col-role role-admin">ADMIN</th>
+                        <th class="col-role role-staff">STAFF</th>
+                        <th class="col-role role-manager">CLASS_MGR</th>
+                        <th class="col-role role-teacher">TEACHER</th>
+                        <th class="col-role role-student">STUDENT</th>
+                        <th class="col-role role-owner">OWNER</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="col-feature">Tạo hồ sơ giáo viên</td>
+                        <td class="col-api"><span class="method method-post">POST</span>/api/v1/teachers</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Cập nhật hồ sơ giáo viên</td>
+                        <td class="col-api"><span class="method method-put">PUT</span>/api/v1/teachers/{id}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-self">Self</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xóa hồ sơ giáo viên</td>
+                        <td class="col-api"><span class="method method-delete">DELETE</span>/api/v1/teachers/{id}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xem chi tiết giáo viên</td>
+                        <td class="col-api"><span class="method method-get">GET</span>/api/v1/teachers/{id}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-student"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xem danh sách giáo viên</td>
+                        <td class="col-api"><span class="method method-get">GET</span>/api/v1/teachers</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-student"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Tìm bằng User ID</td>
+                        <td class="col-api"><span class="method method-get">GET</span>/api/v1/teachers/user/{userId}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-self">Self</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section 4: Course and Subject Modules (Shared Read) -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-title">
+                <span class="section-icon"></span>
+                <span>4. Phân hệ Khóa học & Môn học (`Course` & `Subject`)</span>
+            </div>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-feature">Chức năng</th>
+                        <th class="col-api">Phương thức & API Endpoint</th>
+                        <th class="col-role role-admin">ADMIN</th>
+                        <th class="col-role role-staff">STAFF</th>
+                        <th class="col-role role-manager">CLASS_MGR</th>
+                        <th class="col-role role-teacher">TEACHER</th>
+                        <th class="col-role role-student">STUDENT</th>
+                        <th class="col-role role-owner">OWNER</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="col-feature">Tạo mới khóa học / môn</td>
+                        <td class="col-api"><span class="method method-post">POST</span>/api/v1/courses (hoặc /subjects)</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Cập nhật khóa học / môn</td>
+                        <td class="col-api"><span class="method method-put">PUT</span>/api/v1/courses/{id}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xóa khóa học / môn</td>
+                        <td class="col-api"><span class="method method-delete">DELETE</span>/api/v1/courses/{id}</td>
+                        <td class="col-role role-admin"><span class="badge badge-allow">✓</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-student"><span class="badge badge-deny">✗</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-deny">✗</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xem chi tiết khóa học / môn</td>
+                        <td class="col-api"><span class="method method-get">GET</span>/api/v1/courses/{id}</td>
+                        <td class="col-role role-admin"><span class="badge badge-all">All</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-all">All</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-all">All</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-all">All</span></td>
+                        <td class="col-role role-student"><span class="badge badge-all">All</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-all">All</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-feature">Xem danh sách khóa / môn</td>
+                        <td class="col-api"><span class="method method-get">GET</span>/api/v1/courses</td>
+                        <td class="col-role role-admin"><span class="badge badge-all">All</span></td>
+                        <td class="col-role role-staff"><span class="badge badge-all">All</span></td>
+                        <td class="col-role role-manager"><span class="badge badge-all">All</span></td>
+                        <td class="col-role role-teacher"><span class="badge badge-all">All</span></td>
+                        <td class="col-role role-student"><span class="badge badge-all">All</span></td>
+                        <td class="col-role role-owner"><span class="badge badge-all">All</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2026 EduTopS Portal System. Tất cả các endpoint đều được bảo mật bằng JWT và xác thực tự động.</p>
+        <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem;">Được xây dựng trên cấu trúc Spring Security Method Security.</p>
+    </footer>
+</div>
+
+<script>
+    function highlightRole(roleClass, colIndex) {
+        // Reset active states on buttons
+        const buttons = document.querySelectorAll('.role-btn');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        
+        // Add active state to clicked button
+        const clickedBtn = event.currentTarget;
+        clickedBtn.classList.add('active');
+
+        // Reset all tables highlight
+        const allTds = document.querySelectorAll('td, th');
+        allTds.forEach(td => td.classList.remove('highlight-col'));
+
+        // Highlight selected column across all tables
+        const tables = document.querySelectorAll('table');
+        tables.forEach(table => {
+            const rows = table.rows;
+            for (let i = 0; i < rows.length; i++) {
+                const cells = rows[i].cells;
+                if (cells.length > colIndex) {
+                    cells[colIndex].classList.add('highlight-col');
+                }
+            }
+        });
+    }
+
+    function resetHighlight() {
+        const buttons = document.querySelectorAll('.role-btn');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        
+        const lastBtn = buttons[buttons.length - 1];
+        lastBtn.classList.add('active');
+
+        const allTds = document.querySelectorAll('td, th');
+        allTds.forEach(td => td.classList.remove('highlight-col'));
+    }
+</script>
+</body>
+</html>
