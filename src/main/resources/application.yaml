@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: edutops
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/edutops
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  port: 8080
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:edu_top_s_secret_key_must_be_extremely_long_at_least_256_bits_for_hmac_sha_256_secure_key}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+  google:
+    client-id: ${GOOGLE_CLIENT_ID:YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com}
