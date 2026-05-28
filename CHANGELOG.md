@@ -26,17 +26,18 @@ gantt
 
 ## [Chưa phát hành - v1.0.0-beta2] - (Core Business Baseline)
 
-Phiên bản này tập trung hoàn thiện các nghiệp vụ cơ bản của Giai đoạn 1 (Teacher & Course), tối ưu hóa trải nghiệm đăng nhập Google và chuẩn bị phân quyền chi tiết cho vai trò Quản lý lớp học (`CLASS_MANAGER`).
+Phiên bản này tập trung hoàn thiện các nghiệp vụ cơ bản của Giai đoạn 1 (Teacher & Course), tối ưu hóa trải nghiệm đăng nhập Google và chuẩn bị phân quyền chi tiết cho vai trò Quản lý lớp học (`CLASS_MANAGER`) và Nhân viên tư vấn (`STAFF`).
 
 ### Added (Sắp thêm mới)
 * **Khóa học có thời hạn đào tạo**: Bổ sung ngày bắt đầu (`startDate`) và ngày kết thúc (`endDate`) vào thực thể Khóa học (`Course`) kèm theo các ràng buộc kiểm tra nghiệp vụ (`startDate <= endDate`).
-* **Vai trò Quản lý lớp học (`CLASS_MANAGER`)**: Thêm vai trò mới vào hệ thống phân quyền trong `UserRole.java`.
+* **Vai trò Nhân sự Mới**: Bổ sung hai vai trò Quản lý lớp học (`CLASS_MANAGER`) và Nhân viên tư vấn/vận hành (`STAFF`) vào hệ thống phân quyền trong `UserRole.java`.
 * **API Hoàn tất hồ sơ cá nhân**: Endpoint `POST /api/v1/students/user/{userPublicId}/complete-profile` bảo mật cao cho phép người dùng tự điền số điện thoại, ngày sinh và giới tính thật sau khi đăng nhập qua Google.
 * **Cấu hình Authorize Swagger UI**: Tích hợp Bearer JWT Token Scheme trực tiếp vào tài liệu Swagger giúp lập trình viên kiểm thử phân quyền REST APIs trực quan.
 
 ### Changed (Sắp thay đổi)
 * **Tối ưu hóa luồng Google Login**: Loại bỏ việc tự động tạo thực thể `Student` với dữ liệu rác (dummy data) ban đầu. Hệ thống sẽ trả về cờ `profileCompleted = false` để thông báo cho Frontend yêu cầu điền hồ sơ thật.
-* **Phân quyền Quản lý lớp học**: Cập nhật `@PreAuthorize` trên `StudentController` và `TeacherController` cho phép `CLASS_MANAGER` được quyền đọc hồ sơ nhân sự (Giáo viên, Học viên) để thực hiện điều phối ghép lớp học về sau.
+* **Quyền hạn của Nhân viên (STAFF)**: Cho phép `STAFF` có quyền tạo mới học viên ban đầu và cập nhật thông tin hồ sơ cơ bản cho Học sinh (`Student`).
+* **Phân quyền Đọc Nhân sự**: Cập nhật `@PreAuthorize` trên `StudentController` và `TeacherController` cho phép cả `CLASS_MANAGER` và `STAFF` được quyền đọc hồ sơ nhân sự (Giáo viên, Học viên) để phục vụ cho các nghiệp vụ vận hành, xếp lịch.
 
 ### Fixed (Sắp sửa đổi)
 * **Sửa lỗi DDL PostgreSQL**: Khắc phục lỗi không thể chạy tự động cập nhật schema (`alter table add column deleted boolean not null`) trên các bảng đã có dữ liệu cũ bằng cách bổ sung cấu hình `default false` trong thực thể `BaseEntity.java`.
@@ -87,9 +88,11 @@ Phiên bản tối ưu hóa tự động của Giai đoạn 3 giúp xếp lịch
 
 ### Added (Lộ trình thêm mới)
 * **Lập lịch học lặp lại (Schedule)**: Cho phép đăng ký lịch học lặp lại nhiều ngày trong tuần (2-4-6, 3-5-7) dưới dạng checkbox.
+* **Xem Thời khóa biểu lưới trực quan (FR-SCHED-01)**: Cung cấp giao diện Calendar View để xem lịch học theo ngày, tuần, hoặc tháng (mọi người dùng đã đăng nhập, đặc biệt là `STAFF`, được quyền xem trực quan).
 * **Điểm danh (Attendance)**: Module điểm danh từng buổi học cụ thể cho lớp học.
 
 ### Optimizations (Tối ưu hóa tương lai)
+* **Bộ lọc Thông minh (FR-SCHED-02)**: Hỗ trợ `STAFF` và người dùng lọc/tìm kiếm lịch học linh hoạt theo Tên/Mã Lớp học, Tên Giáo viên phụ trách, hoặc Tên Phòng học cụ thể.
 * **Thuật toán tránh trùng lịch (Collision Detection)**: 
   * Tự động kiểm tra trùng giờ dạy của Giáo viên trên toàn hệ thống và chặn xếp lịch nếu giáo viên bị trùng giờ dạy.
   * Tự động kiểm tra tính khả dụng của Phòng học (`Room`) trong cùng khung giờ và thứ trong tuần.
